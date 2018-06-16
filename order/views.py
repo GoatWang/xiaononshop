@@ -25,10 +25,14 @@ def index(request):
 ## handle message and event
 def _handle_text_msg(event):
     text = event.message.text
-    user_id = event.source.user_id
+    print(text)
+    print(text)
+    print(text)
+    print(text)
+    # user_id = event.source.user_id
     # user_name = line_bot_api.get_profile(user_id).display_name
     # messages = [TextSendMessage(text=user_name+": "+text)]
-    messages = [TextSendMessage(text=text)]
+    messages = TextSendMessage(text="test")
     line_bot_api.reply_message(
         event.reply_token,
         messages

@@ -19,7 +19,39 @@ parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
+# def get_bento_info(bento_id):
 
+
+
+# def get_bento_menu(data):
+#     columns = []
+#     for idx, row in enumerate(data):
+#         store_name = row['公司商號']
+#         address = parse_address(row['地址'])
+#         phone_num = parse_phone_num(row['電話'])
+#         _id = str(row['_id'])
+
+#         print(store_name)
+#         print(address)
+#         print(phone_num)
+#         carousel = CarouselColumn(
+#                     thumbnail_image_url='https://example.com/item2.jpg'
+#                     title=store_name[:39],
+#                     text=address[:119],
+#                     actions=[
+
+#                         PostbackTemplateAction(
+#                             label='優惠項目',
+#                             data='action=authorized_store_detail&_id=' + _id 
+#                         )
+#                     ]
+#                 )
+#         columns.append(carousel)
+#     carousel_template_message = TemplateSendMessage(
+#         alt_text='回應店家搜尋',
+#         template=CarouselTemplate(columns=columns)
+#     )
+#     return carousel_template_message
 
 
 ## handle message and event
@@ -27,6 +59,13 @@ def _handle_text_msg(event):
     text = event.message.text
     user_id = event.source.user_id
     user_name = line_bot_api.get_profile(user_id).display_name
+
+    # if text == "動作: 開始訂購":
+        
+    #     "香茅檸檬嫩雞"
+    #     "紅麴燒豬肉"
+    # elif text == "動作: 飯盒菜單":
+    # elif text == "動作: 聯絡我們":
     messages = [TextSendMessage(text=user_name+": "+text)]
     line_bot_api.reply_message(
         event.reply_token,

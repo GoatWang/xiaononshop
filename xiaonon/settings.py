@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
+import json
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,7 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-]
+    'order.apps.OrderConfig',
+]    
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -120,3 +123,17 @@ USE_TZ = True
 STATIC_URL = '/static/'
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
+
+if 'LINE_CHANNEL_SECRET' in os.environ:
+    pwddata = {
+        "LINE_CHANNEL_ACCESS_TOKEN" : os.environ.get('LINE_CHANNEL_ACCESS_TOKEN'),
+        "LINE_CHANNEL_SECRET" : os.environ.get('LINE_CHANNEL_SECRET'),
+    }
+else:
+    with open(os.path.join(BASE_DIR, "pwd.json"), 'r', encoding='utf8') as f:
+        pwddata = json.load(f)
+
+LINE_CHANNEL_ACCESS_TOKEN = pwddata['LINE_CHANNEL_ACCESS_TOKEN']
+LINE_CHANNEL_SECRET = pwddata['LINE_CHANNEL_SECRET']
+
+

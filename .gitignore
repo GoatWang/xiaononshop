@@ -1,0 +1,16 @@
+pwd.json
+*.log
+venv
+*.pyc
+staticfiles
+.env
+.vscode
+__pycache__
+pwd.json
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+#.ebextensions/02_packages.config
+

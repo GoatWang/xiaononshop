@@ -14,7 +14,7 @@ class LineProfile(models.Model):
     line_id = models.CharField(max_length=50, primary_key=True, verbose_name="LineID")
     line_name = models.CharField(max_length=100, verbose_name="Line名稱")
     line_picture_url = models.URLField(verbose_name="照片網址")
-    line_status_message = models.CharField(max_length=100)
+    line_status_message = models.CharField(max_length=100, blank=True, null=True)
     email = models.EmailField(blank=True, null=True, verbose_name="電子郵件")
     phone = models.CharField(max_length=15, blank=True, null=True, verbose_name="電話")
     job = models.ForeignKey('Job', blank=True, null=True, on_delete=models.CASCADE, verbose_name="職業")

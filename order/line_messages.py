@@ -30,6 +30,10 @@ def get_order_date_reply_messages(event):
     for i in range(available_dates_len):
         messages_with_btns.append(available_dates[i*4:(i+1)*4].copy())
 
+    print(available_dates)
+    print(available_dates_len)
+    print(messages_count)
+    print(messages_with_btns)
     messages = []
     for message_with_btns in messages_with_btns:
         actions = []

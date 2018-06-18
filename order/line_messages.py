@@ -27,47 +27,29 @@ def get_order_date_reply_messages(event):
     messages_count = messages_count + 1 if available_dates_len%4 != 0 else messages_count
 
     messages_with_btns = []
-    for i in range(available_dates_len):
+    for i in range(messages_count):
         messages_with_btns.append(available_dates[i*4:(i+1)*4].copy())
 
-    print(available_dates)
-    print(available_dates_len)
-    print(messages_count)
-    print(messages_with_btns)
+    print("available_dates", available_dates)
+    print("available_dates_len", available_dates_len)
+    print("messages_count", messages_count)
+    print("messages_with_btns", messages_with_btns)
     messages = []
     for message_with_btns in messages_with_btns:
         actions = []
-        # for btn in message_with_btns:
-        #     actions.append(
-        #             PostbackTemplateAction(
-        #                     label=str(btn.month) + "月" + str(btn.day) + "日",
-        #                     data= 'action=get_order_date_reply_messages&date='+str((btn.year, btn.month, btn.day))
-        #                 )
-        #             )
-        
-        # buttons_template_message = TemplateSendMessage(
-        #         alt_text='訂餐日期選擇',
-        #         template=ButtonsTemplate(
-        #             title='訂餐日期選擇',
-        #             text='請問哪一天想吃小農飯盒呢?',
-        #             actions=actions
-        #         )
-        #     )
-
-
         for btn in message_with_btns:
             actions.append(
                     PostbackTemplateAction(
-                            label="AA",
-                            data= 'action=AA'
+                            label=str(btn.month) + "月" + str(btn.day) + "日",
+                            data= 'action=get_order_date_reply_messages&date='+str((btn.year, btn.month, btn.day))
                         )
                     )
-
+        
         buttons_template_message = TemplateSendMessage(
-                alt_text='AAAA',
+                alt_text='訂餐日期選擇',
                 template=ButtonsTemplate(
-                    title='AAAA',
-                    text='BBBB',
+                    title='訂餐日期選擇',
+                    text='請問哪一天想吃小農飯盒呢?',
                     actions=actions
                 )
             )

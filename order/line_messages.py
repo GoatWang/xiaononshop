@@ -37,19 +37,25 @@ def get_order_date_reply_messages(event):
             actions.append(
                     PostbackTemplateAction(
                             label=str(btn.month) + "月" + str(btn.day) + "日",
-                            data= 'action=date'
-                            # data= 'action=get_order_date_reply_messages&date='+str((btn.year, btn.month, btn.day)).replace(' ', '')
+                            data= 'action=get_order_date_reply_messages&date='+str((btn.year, btn.month, btn.day))
                         )
                     )
         
+        # buttons_template_message = TemplateSendMessage(
+        #         alt_text='訂餐日期選擇',
+        #         template=ButtonsTemplate(
+        #             title='訂餐日期選擇',
+        #             text='請問哪一天想吃小農飯盒呢?',
+        #             actions=actions
+        #         )
+        #     )
         buttons_template_message = TemplateSendMessage(
-                alt_text='訂餐日期選擇',
+                alt_text='AAAA',
                 template=ButtonsTemplate(
-                    title='訂餐日期選擇',
-                    text='請問哪一天想吃小農飯盒呢?',
+                    title='AAAA',
+                    text='BBBB',
                     actions=actions
                 )
             )
-
         messages.append(buttons_template_message)
     return messages

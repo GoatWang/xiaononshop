@@ -146,18 +146,35 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-STATIC_URL = '/static/'
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
-STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 
-
+# S3 access settings
 AWS_ACCESS_KEY_ID = pwddata['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS_KEY = pwddata['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME = pwddata['AWS_STORAGE_BUCKET_NAME']
+
+# S3 file storage settings (user upload)
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
+# general static settings
+# STATIC_URL = '/static/'
+# STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
+
+# S3 static settings
+STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
+STATIC_LOCATION = 'static'  # Settings used in storages.py
+STATICFILES_STORAGE = 'xiaonon.storages.StaticStorage' ## disable static_root: will directly help you collect static files to S3 when running collectstatic 
+STATIC_URL = 'https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'  ## for accsessing static files in S3
+
+# S3 media settings
+# ENV_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+# MEDIA_ROOT = os.path.join(ENV_PATH, 'media')  ## user upload to this place
+# MEDIA_LOCATION = 'media'    # You should have created two folders on your bucket with these names
+# DEFAULT_FILE_STORAGE = 'TPautomation.storages.MediaStorage'  ## from django.core.files.storage import default_storage
+# MEDIA_URL = 'https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/media/'  ## seems like I have to upload my media to this url
 
 LINE_CHANNEL_ACCESS_TOKEN = pwddata['LINE_CHANNEL_ACCESS_TOKEN']
 LINE_CHANNEL_SECRET = pwddata['LINE_CHANNEL_SECRET']
+
 
 

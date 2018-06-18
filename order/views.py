@@ -23,7 +23,7 @@ def index(request):
 
 def _handle_follow_event(event):
     line_id = event.source.user_id
-    profile = line_bot_api.get_profile(user_id)
+    profile = line_bot_api.get_profile(line_id)
     
     LineProfile.objects.create(
         line_id = line_id,
@@ -79,8 +79,8 @@ def _handle_unfollow_event(event):
 ## handle message and event
 def _handle_text_msg(event):
     text = event.message.text
-    user_id = event.source.user_id
-    user_name = line_bot_api.get_profile(user_id).display_name
+    line_id = event.source.user_id
+    user_name = line_bot_api.get_profile(line_id).display_name
 
     # if text == "動作: 開始訂購":
         

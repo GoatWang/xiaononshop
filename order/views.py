@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from xiaonon import settings
+from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -18,6 +19,27 @@ parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
+
+
+def _handle_follow_event(event):
+    line_id = event.source.user_id
+    profile = line_bot_api.get_profile(user_id)
+    
+    LineProfile.objects.create(
+        line_id = line_id,
+        line_name = profile.display_name,
+        line_picture_url = profile.picture_url,
+        line_status_message=profile.status_message,
+    )
+
+    # messages=[]
+    # line_bot_api.reply_message(event.reply_token, messages)
+
+def _handle_unfollow_event(event):
+    line_id = event.source.user_id
+    line_profile = LineProfile.objects.get(line_id=line_id)
+    line_profile.unfollow = True
+
 
 # def get_bento_info(bento_id):
 
@@ -91,8 +113,8 @@ def callback(request):
                     _handle_text_msg(event)
             #     if isinstance(event.message, LocationMessage):
             #         _handle_location_msg(event)
-            # if isinstance(event, FollowEvent):
-            #     _handle_follow_event(event)
+            if isinstance(event, FollowEvent):
+                _handle_follow_event(event)
             # if isinstance(event, UnfollowEvent):
             #     _handle_unfollow_event(event)
             # if isinstance(event, PostbackEvent):

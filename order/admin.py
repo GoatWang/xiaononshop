@@ -4,6 +4,14 @@ import json
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 
 admin.site.register(Job)
+
+
+# --------------------------------------------------------------------------
+# LineProfile
+class LineProfileAdmin(admin.ModelAdmin):
+    list_display = ['line_name', 'email', 'phone', 'job', 'unfollow', 'create_time']
+    ordering = ['line_name', 'email', 'phone', 'job', 'unfollow', 'create_time']
+
 admin.site.register(LineProfile)
 admin.site.register(BentoType)
 

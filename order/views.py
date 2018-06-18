@@ -71,7 +71,7 @@ def _handle_postback_event(event):
     line_id = event.source.user_id
     user_name = line_bot_api.get_profile(line_id).display_name
 
-    user_searching_status = LineProfile.objects.get(line_id=line_id).values_list('status')
+    user_searching_status = LineProfile.objects.get(line_id=line_id).status
     print(event.postback.data)
     postback_data = parse_url_query_string(event.postback.data)
     print(postback_data)

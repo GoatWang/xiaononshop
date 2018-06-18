@@ -20,6 +20,7 @@ from datetime import datetime
 def get_order_date_reply_messages(event):
     maximum_futere_days_for_ordering = 14
     available_dates = sorted(list(set(Bento.objects.filter(date__gt=datetime.now().date(), ready=True).values_list('date', flat=True))))[:maximum_futere_days_for_ordering]
+
     available_dates_len = len(available_dates)
     
     messages_count = available_dates_len // 4
@@ -35,8 +36,8 @@ def get_order_date_reply_messages(event):
         for btn in message_with_btns:
             actions.append(
                     PostbackTemplateAction(
-                            label=str(btn),
-                            data= 'action=get_order_date_reply_messages&date='+str(btn)
+                            label=str(btn.month) + "月" + str(btn.day) + "日",
+                            data= 'action=get_order_date_reply_messages&date='+str((btn.year, btn.month, btn.day))
                         )
                     )
         

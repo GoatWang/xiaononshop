@@ -37,7 +37,8 @@ def get_order_date_reply_messages(event):
             actions.append(
                     PostbackTemplateAction(
                             label=str(btn.month) + "月" + str(btn.day) + "日",
-                            data= 'action=get_order_date_reply_messages&date='+str((btn.year, btn.month, btn.day)).replace(' ', '')
+                            data= 'action=date'
+                            # data= 'action=get_order_date_reply_messages&date='+str((btn.year, btn.month, btn.day)).replace(' ', '')
                         )
                     )
         

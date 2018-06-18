@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
 from xiaonon import settings
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 
@@ -17,8 +18,6 @@ from linebot.models import (
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 from line_messages import get_order_date_reply_messages
-
-from datetime import datetime
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")

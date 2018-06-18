@@ -12,7 +12,7 @@ class LineProfileAdmin(admin.ModelAdmin):
     list_display = ['line_name', 'email', 'phone', 'job', 'unfollow', 'create_time']
     ordering = ['line_name', 'email', 'phone', 'job', 'unfollow', 'create_time']
 
-admin.site.register(LineProfile)
+admin.site.register(LineProfile, LineProfileAdmin)
 admin.site.register(BentoType)
 
 

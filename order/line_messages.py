@@ -1,3 +1,17 @@
+from xiaonon import settings
+from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
+from linebot.exceptions import InvalidSignatureError, LineBotApiError
+from linebot.models import (
+    MessageEvent, FollowEvent, PostbackEvent, UnfollowEvent,
+    TextMessage, LocationMessage, 
+    TextSendMessage, TemplateSendMessage,ImageSendMessage, StickerSendMessage,
+    ButtonsTemplate, ConfirmTemplate, CarouselTemplate,
+    PostbackTemplateAction, MessageTemplateAction, URITemplateAction,
+    CarouselColumn
+)
+line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
+parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
+
 def get_order_date_reply_messages(event):
     maximum_futere_days_for_ordering = 14
     available_dates = sorted(list(set(Bento.objects.filter(date__gt=datetime.now().date(), ready=True).values_list('date', flat=True))))[:maximum_futere_days_for_ordering]

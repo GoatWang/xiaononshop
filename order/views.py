@@ -14,9 +14,9 @@ from linebot.models import (
     PostbackTemplateAction, MessageTemplateAction, URITemplateAction,
     CarouselColumn
 )
-from line_messages import get_order_date_reply_messages
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
+from line_messages import get_order_date_reply_messages
 
 from datetime import datetime
 

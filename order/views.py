@@ -41,11 +41,11 @@ def _handle_unfollow_event(event):
 
 def get_order_date_reply_messages(event):
     maximum_futere_days_for_ordering = 14
-    available_dates = set(Bento.objects.filter(date__gt=datetime.now().date(), ready=True).values_list('date', flat=True))
-    available_dates_len = len(available_dates) if len(available_dates) <= maximum_futere_days_for_ordering else maximum_futere_days_for_ordering
-
-    messages_count = len(available_dates_len) // 4
-    messages_count = messages_count + 1 if len(available_dates_len)%4 != 0 else messages_count
+    available_dates = sorted(list(set(Bento.objects.filter(date__gt=datetime.now().date(), ready=True).values_list('date', flat=True))))[:maximum_futere_days_for_ordering]
+    available_dates_len = len(available_dates)
+    
+    messages_count = available_dates_len // 4
+    messages_count = messages_count + 1 if available_dates_len%4 != 0 else messages_count
 
     messages_with_btns = []
     for i in range(available_dates_len):

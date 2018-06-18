@@ -15,10 +15,10 @@ class LineProfile(models.Model):
     line_name = models.CharField(max_length=100, verbose_name="Line名稱")
     line_picture_url = models.URLField(verbose_name="照片網址")
     line_status_message = models.CharField(max_length=100)
-    email = models.EmailField(blank=True, verbose_name="電子郵件")
-    phone = models.CharField(max_length=15, blank=True, verbose_name="電話")
-    job = models.ForeignKey('Job', blank=True, on_delete=models.CASCADE, verbose_name="職業")
-    state = models.CharField(max_length=10, blank=True, verbose_name="狀態")
+    email = models.EmailField(blank=True, null=True, verbose_name="電子郵件")
+    phone = models.CharField(max_length=15, blank=True, null=True, verbose_name="電話")
+    job = models.ForeignKey('Job', blank=True, null=True, on_delete=models.CASCADE, verbose_name="職業")
+    state = models.CharField(max_length=10, blank=True, null=True, verbose_name="狀態")
     unfollow = models.BooleanField(default=False, verbose_name="屏蔽")
     create_time = models.DateTimeField(auto_now=True)
     def __str__(self):
@@ -68,10 +68,10 @@ class AreaLimitation(models.Model):
 class Order(models.Model):
     line_profile = models.ForeignKey('LineProfile', on_delete=models.CASCADE, verbose_name="Line名稱")
     bento = models.ForeignKey('Bento', on_delete=models.CASCADE, verbose_name="飯盒")
-    number = models.IntegerField(verbose_name="數量")
-    create_time = models.DateTimeField(auto_now_add=True, verbose_name="創建時間")
     area = models.ForeignKey("Area", on_delete=models.CASCADE, verbose_name="地區")
     distribution_place = models.ForeignKey("DistributionPlace", on_delete=models.CASCADE, verbose_name="發放地點")
+    number = models.IntegerField(verbose_name="數量")
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name="創建時間")
     def __str__(self):
         return str(self.line_profile) + "_" + str(self.bento) + "_" + str(self.number)
 

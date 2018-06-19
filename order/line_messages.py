@@ -144,9 +144,9 @@ def get_distribution_place_reply_messages(event, date_string, area_id):
 def get_bento_reply_messages(event, date_string, area_id, distribution_place_id):
     date = datetime(*eval(date_string))
     available_bentos = AreaLimitation.objects.filter(area=int(area_id), bento__date=date, bento__ready=True).values('bento__id', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
-    
+
+    carousel_columns = []
     for bento in available_bentos:
-        carousel_columns = []
         if bento['remain'] > 0:
             carousel_column = CarouselColumn(
                 thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
@@ -164,13 +164,13 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
                 thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
                 title=bento['bento__name'] + "(已售完)",
                 text="類型: " + bento['bento__bento_type__bento_type'] + "\n" + "價格: " + str(bento['bento__price']) + "元\n" + "配菜: " + bento['bento__cuisine'],
-                actions=[
-                    PostbackTemplateAction(
-                        label='重新開始訂購流程',
-                        text ='動作: 開始訂購'
-                        # data='action=get_distribution_place_reply_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento['bento__id'])
-                    ),
-                ]
+                # actions=[
+                #     PostbackTemplateAction(
+                #         label='重新開始訂購流程',
+                #         text ='動作: 開始訂購'
+                #         # data='action=get_distribution_place_reply_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento['bento__id'])
+                #     ),
+                # ]
             )
         carousel_columns.append(carousel_column)
 

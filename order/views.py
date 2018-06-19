@@ -101,9 +101,10 @@ def _handle_postback_event(event):
         distribution_place_id = postback_data['distribution_place_id']
         bento_id = postback_data['bento_id']
         order_number = postback_data['order_number']
+        line_profile = LineProfile.objects.get(line_id=line_id)
         # complete order process
         Order.objects.create(
-            line_profile=line_id,
+            line_profile=line_profile,
             bento=bento_id,
             area=area_id,
             distribution_place=distribution_place_id,

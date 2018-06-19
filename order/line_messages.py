@@ -16,6 +16,23 @@ line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 
 from datetime import datetime
+weekday_zh_mapping = {
+    1: "一",
+    2: "二",
+    3: "三",
+    4: "四",
+    5: "五",
+    6: "六",
+    7: "日"
+}
+
+college_simplify_mapping = {
+    "國立臺灣大學":"臺大",
+    "國立政治大學":"政大",
+    "國立臺北教育大學":"北教大",
+    "國立師範大學":"師大",
+}
+
 
 def get_order_date_reply_messages(event):
     maximum_futere_days_for_ordering = 14
@@ -35,7 +52,7 @@ def get_order_date_reply_messages(event):
         for btn in message_with_btns:
             actions.append(
                     PostbackTemplateAction(
-                            label=str(btn.month) + "月" + str(btn.day) + "日" + "(" + btn.weekday() + ")",
+                            label=str(btn.month) + "月" + str(btn.day) + "日" + "(" + weekday_zh_mapping[tn.weekday()] + ")",
                             data= 'action=get_order_date_reply_messages&date_string='+str((btn.year, btn.month, btn.day))
                         )
                     )
@@ -50,13 +67,6 @@ def get_order_date_reply_messages(event):
             )
         messages.append(buttons_template_message)
     return messages
-
-college_mapping = {
-    "國立臺灣大學":"臺大",
-    "國立政治大學":"政大",
-    "國立臺北教育大學":"北教大",
-    "國立師範大學":"師大",
-}
 
 def get_area_reply_messages(event, date_string):
     date = datetime(*eval(date_string))
@@ -79,7 +89,7 @@ def get_area_reply_messages(event, date_string):
         for btn in message_with_btns:
             actions.append(
                     PostbackTemplateAction(
-                            label=college_mapping.get(btn['area__area'], btn['area__area']) + '(剩餘' + str(btn['total_remain']) + '個)',
+                            label=college_simplify_mapping.get(btn['area__area'], btn['area__area']) + '(剩餘' + str(btn['total_remain']) + '個)',
                             data= 'action=get_area_reply_messages&date_string='+date_string+"&area_id="+str(btn['area__id'])
                         )
                     )

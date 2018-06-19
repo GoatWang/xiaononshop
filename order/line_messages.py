@@ -131,7 +131,7 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
     
     for bento in available_bentos:
         carousel_columns = []
-        if bento.remain > 0:
+        if bento['remain'] > 0:
             carousel_column = CarouselColumn(
                 thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
                 title=bento.bento__name,

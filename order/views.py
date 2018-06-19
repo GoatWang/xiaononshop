@@ -105,7 +105,7 @@ def _handle_postback_event(event):
         target_line_profile = LineProfile.objects.get(line_id=line_id)
         target_bento = Bento.objects.get(id=bento_id)
         target_area = Area.objects.get(id=area_id)
-        target_distribution_place = DistributionPlace.objects.get(distribution_place_id)
+        target_distribution_place = DistributionPlace.objects.get(id=distribution_place_id)
         # complete order process
         Order.objects.create(
             line_profile=target_line_profile,

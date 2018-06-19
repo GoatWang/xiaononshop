@@ -248,6 +248,7 @@ def get_order_detail_messages(event, date_string, area_id, distribution_place_id
     area_string = Area.objects.get(id=area_id).area
     area_string = college_simplify_mapping.get(area_string, area_string)
     distrbution_place_string = DistributionPlace.objects.get(id=distribution_place_id)
+    
     reply_text = "感謝您的訂購！訂購資訊如下: \n" + \
                 "日期: " + date_to_zh_string(url_string_to_date(date_string)) + \
                 "訂購人: " + user_name + "\n" + \

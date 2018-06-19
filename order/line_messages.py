@@ -16,32 +16,7 @@ line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 
 from datetime import datetime
-weekday_zh_mapping = {
-    1: "一",
-    2: "二",
-    3: "三",
-    4: "四",
-    5: "五",
-    6: "六",
-    7: "日"
-}
-
-college_simplify_mapping = {
-    "國立臺灣大學":"臺大",
-    "國立政治大學":"政大",
-    "國立臺北教育大學":"北教大",
-    "國立師範大學":"師大",
-}
-
-def date_to_zh_string(date):
-    """accept datetime or date filed"""
-    return str(date.month) + "月" + str(date.day) + "日" + "(" + weekday_zh_mapping[date.weekday()] + ")"
-
-def date_to_url_string(date):
-    return str((date.year, date.month, date.day))
-
-def url_string_to_date(url_string):
-    return datetime(*eval(url_string))
+from order.utl import weekday_zh_mapping, college_simplify_mapping, date_to_zh_string, date_to_url_string, url_string_to_date, get_order_detail
 
 def get_order_date_reply_messages(event):
     maximum_futere_days_for_ordering = 14
@@ -239,22 +214,10 @@ def get_order_number_messages(event, date_string, area_id, distribution_place_id
         messages.append(buttons_template_message)
     return messages
 
-
-# def get_phone_number_messages(event, date_string, area_id, distribution_place_id, bento_id):
-    
 def get_order_confirmation_messages(event, date_string, area_id, distribution_place_id, bento_id, order_number, line_id):
-    user_name = line_bot_api.get_profile(line_id).display_name
-    bento_string = Bento.objects.get(id=bento_id).name
-    area_string = Area.objects.get(id=area_id).area
-    area_string = college_simplify_mapping.get(area_string, area_string)
-    distrbution_place_string = DistributionPlace.objects.get(id=distribution_place_id).distribution_place
-
-    confirm_text = "請確認以下訂購資訊: \n" + \
-                "日期: " + date_to_zh_string(url_string_to_date(date_string)) + \
-                "訂購人: " + user_name + "\n" + \
-                "品項: " + bento_string + "(" + str(order_number) + "個)\n" + \
-                "取餐地點: " + area_string + distrbution_place_string
-
+    order_detail = get_order_detail(date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
+    confirm_text = "請確認以下訂單資訊: \n" + order_detail
+    
     confirm_template_message = TemplateSendMessage(
         alt_text='訂單確認',
         template=ConfirmTemplate(

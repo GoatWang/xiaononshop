@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from xiaonon import settings
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
+from order.utl import get_order_detail
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -122,23 +123,19 @@ def _handle_postback_event(event):
             number=order_number
         )
 
+        order_detail = get_order_detail(date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
+        messages = [TextSendMessage(text="恭喜您訂購成功" + order_detail)]
+
         line_profile = LineProfile.objects.get(line_id=line_id)
         if not line_profile.phone:
             line_profile.state = 'phone'
             line_profile.save()
             messages.extend([TextSendMessage(text="請留下您的電話，以方便我們聯絡您取餐: \nex. 0912345678")])
     
-
         # print("date_string", date_string)
         # print("area_id", area_id)
         # print("distribution_place_id", distribution_place_id)
         # print("bento_id", bento_id)
-        # messages = [
-        #     TextSendMessage(text="area_id: "+str(area_id)),
-        #     TextSendMessage(text="date_string: "+str(date_string)),
-        #     TextSendMessage(text="distribution_place_id: "+str(distribution_place_id)),
-        #     TextSendMessage(text="bento_id: "+str(bento_id))
-        #     ]
 
     line_bot_api.reply_message(
         event.reply_token,

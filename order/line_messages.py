@@ -74,7 +74,7 @@ def get_area_reply_messages(event, date_string):
             actions.append(
                     PostbackTemplateAction(
                             label=btn['area__area'] + '(剩餘' + str(btn['total_remain']) + '個)',
-                            data= 'action=get_area_reply_messages&date_string='+date_string+"&area_id="+btn['area__id']
+                            data= 'action=get_area_reply_messages&date_string='+date_string+"&area_id="+str(btn['area__id'])
                         )
                     )
         

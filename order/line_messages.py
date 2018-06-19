@@ -242,18 +242,35 @@ def get_order_number_messages(event, date_string, area_id, distribution_place_id
 
 # def get_phone_number_messages(event, date_string, area_id, distribution_place_id, bento_id):
     
-def get_order_detail_messages(event, date_string, area_id, distribution_place_id, bento_id, order_number, line_id):
+def get_order_confirmation_messages(event, date_string, area_id, distribution_place_id, bento_id, order_number, line_id):
     user_name = line_bot_api.get_profile(line_id).display_name
     bento_string = Bento.objects.get(id=bento_id).name
     area_string = Area.objects.get(id=area_id).area
     area_string = college_simplify_mapping.get(area_string, area_string)
     distrbution_place_string = DistributionPlace.objects.get(id=distribution_place_id).distribution_place
 
-    reply_text = "感謝您的訂購！訂購資訊如下: \n" + \
+    confirm_text = "請確認以下訂購資訊: \n" + \
                 "日期: " + date_to_zh_string(url_string_to_date(date_string)) + \
                 "訂購人: " + user_name + "\n" + \
-                "品項: " + bento_string + "(" + str(order_number) + ")" + \
+                "品項: " + bento_string + "(" + str(order_number) + "個)\n" + \
                 "取餐地點: " + area_string + distrbution_place_string
-
-    messages = [TextSendMessage(text=reply_text)]
+    buttons_template_message = TemplateSendMessage(
+            alt_text='訂單確認',
+            template=ButtonsTemplate(
+                title='訂單確認',
+                text=confirm_text,
+                actions=[
+                    PostbackTemplateAction(
+                            label="確認訂購",
+                            data= 'action=get_order_detail_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento_id)+'&order_number=' + str(order_number)
+                        ),
+                    PostbackTemplateAction(
+                            label="重新選擇品項",
+                            text="動作: 開始訂購",
+                            data= 'action=restart_order&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento_id)+'&order_number=' + str(order_number)
+                        )
+                ]
+            )
+        )
+    messages = [buttons_template_message]
     return messages

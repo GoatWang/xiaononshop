@@ -17,7 +17,7 @@ from linebot.models import (
 )
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
-from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_detail_messages
+from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_confirmation_messages
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -59,7 +59,7 @@ def _handle_text_msg(event):
     if text == "動作: 開始訂購":
         messages = get_order_date_reply_messages(event)
 
-    elif line_profile_state == "order_phone":
+    elif line_profile_state == "phone":
         line_profile.phone = str(text)
         line_profile.state = "None"
         line_profile.save()
@@ -102,20 +102,8 @@ def _handle_postback_event(event):
         bento_id = postback_data['bento_id']
         order_number = postback_data['order_number']
 
-        target_line_profile = LineProfile.objects.get(line_id=line_id)
-        target_bento = Bento.objects.get(id=bento_id)
-        target_area = Area.objects.get(id=area_id)
-        target_distribution_place = DistributionPlace.objects.get(id=distribution_place_id)
-        # complete order process
-        Order.objects.create(
-            line_profile=target_line_profile,
-            bento=target_bento,
-            area=target_area,
-            distribution_place=target_distribution_place,
-            number=order_number
-        )
         messages = []
-        order_detail_messages = get_order_detail_messages(event, date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
+        order_detail_messages = get_order_confirmation_messages(event, date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
         messages.extend(order_detail_messages)
 
         line_profile = LineProfile.objects.get(line_id=line_id)
@@ -123,7 +111,29 @@ def _handle_postback_event(event):
             line_profile.state = 'phone'
             line_profile.save()
             messages.extend([TextSendMessage(text="請留下您的電話，以方便我們聯絡您取餐: \nex. 0912345678")])
-        
+    
+    elif postback_data['action'] == 'get_order_confirmation_messages':
+        date_string = postback_data['date_string']
+        area_id = postback_data['area_id']
+        distribution_place_id = postback_data['distribution_place_id']
+        bento_id = postback_data['bento_id']
+        order_number = postback_data['order_number']
+
+        target_line_profile = LineProfile.objects.get(line_id=line_id)
+        target_bento = Bento.objects.get(id=bento_id)
+        target_area = Area.objects.get(id=area_id)
+        target_distribution_place = DistributionPlace.objects.get(id=distribution_place_id)
+
+        Order.objects.create(
+            line_profile=target_line_profile,
+            bento=target_bento,
+            area=target_area,
+            distribution_place=target_distribution_place,
+            number=order_number
+        )
+
+
+
         # print("date_string", date_string)
         # print("area_id", area_id)
         # print("distribution_place_id", distribution_place_id)

@@ -170,7 +170,7 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
                     PostbackTemplateAction(
                         label='重新開始訂購流程',
                         text ='動作: 開始訂購',
-                        date ='action=restart'
+                        data ='action=restart'
                         # data='action=get_distribution_place_reply_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento['bento__id'])
                     ),
                 ]

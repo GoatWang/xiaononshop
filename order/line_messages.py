@@ -35,7 +35,7 @@ def get_order_date_reply_messages(event):
         for btn in message_with_btns:
             actions.append(
                     PostbackTemplateAction(
-                            label=str(btn.month) + "月" + str(btn.day) + "日",
+                            label=str(btn.month) + "月" + str(btn.day) + "日" + "(" + btn.weekday() + ")",
                             data= 'action=get_order_date_reply_messages&date_string='+str((btn.year, btn.month, btn.day))
                         )
                     )
@@ -51,6 +51,12 @@ def get_order_date_reply_messages(event):
         messages.append(buttons_template_message)
     return messages
 
+college_mapping = {
+    "國立臺灣大學":"臺大",
+    "國立政治大學":"政大",
+    "國立臺北教育大學":"北教大",
+    "國立師範大學":"師大",
+}
 
 def get_area_reply_messages(event, date_string):
     date = datetime(*eval(date_string))
@@ -73,7 +79,7 @@ def get_area_reply_messages(event, date_string):
         for btn in message_with_btns:
             actions.append(
                     PostbackTemplateAction(
-                            label=btn['area__area'] + '(剩餘' + str(btn['total_remain']) + '個)',
+                            label=college_mapping.get(btn['area__area'], btn['area__area']) + '(剩餘' + str(btn['total_remain']) + '個)',
                             data= 'action=get_area_reply_messages&date_string='+date_string+"&area_id="+str(btn['area__id'])
                         )
                     )
@@ -134,7 +140,7 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
         if bento['remain'] > 0:
             carousel_column = CarouselColumn(
                 thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
-                title=bento.bento__name,
+                title=bento['bento__name'],
                 text='剩餘: '+ str(bento['remain']) + '個\n' + "類型: " + bento['bento__bento_type__bento_type'] + "\n" + "價格: " + str(bento['price']) + "元\n" + "配菜: " + bento['bento__cuisine'],
                 actions=[
                     PostbackTemplateAction(
@@ -146,7 +152,7 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
         else:
             carousel_column = CarouselColumn(
                 thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
-                title=bento.bento__name + "(已售完)",
+                title=bento['bento__name'] + "(已售完)",
                 text='剩餘: '+ str(bento['remain']) + '個\n' + "類型: " + bento['bento__bento_type__bento_type'] + "\n" + "價格: " + str(bento['price']) + "元\n" + "配菜: " + bento['bento__cuisine'],
             )
         carousel_columns.append(carousel_column)

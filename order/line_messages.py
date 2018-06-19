@@ -225,7 +225,7 @@ def get_order_confirmation_messages(event, date_string, area_id, distribution_pl
             actions=[
                 PostbackTemplateAction(
                     label='確認',
-                    data= 'action=get_order_detail_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento_id)+'&order_number=' + str(order_number)
+                    data= 'action=get_order_confirmation_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento_id)+'&order_number=' + str(order_number)
                 ),
                 MessageTemplateAction(
                     label='取消',

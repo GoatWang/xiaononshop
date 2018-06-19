@@ -123,6 +123,10 @@ def _handle_postback_event(event):
             number=order_number
         )
 
+        area_limitation = AreaLimitation.objects.get(bento=target_bento, area=target_area)
+        area_limitation.remain -= 1
+        area_limitation.save()
+        
         order_detail = get_order_detail(date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
         messages = [TextSendMessage(text="恭喜您訂購成功" + order_detail)]
 

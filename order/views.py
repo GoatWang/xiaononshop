@@ -17,7 +17,7 @@ from linebot.models import (
 )
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
-from order.line_messages import get_order_date_reply_messages
+from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages
 
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -77,7 +77,33 @@ def _handle_postback_event(event):
     print(postback_data)
     
     if postback_data['action'] == 'get_order_date_reply_messages':
-        messages = TextSendMessage(text=postback_data['date'])
+        date_string = postback_data['date_string']
+        messages = get_area_reply_messages(event, date_string)
+    elif postback_data['action'] == 'get_area_reply_messages':
+        date_string = postback_data['date_string']
+        area_id = postback_data['area_id']
+        messages = get_distribution_place_reply_messages(event, date_string, area_id)
+    elif postback_data['action'] == 'get_distribution_place_reply_messages':
+        date_string = postback_data['date_string']
+        area_id = postback_data['area_id']
+        distribution_place_id = postback_data['distribution_place_id']
+        messages = get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
+    elif postback_data['action'] == 'get_bento_reply_messages':
+        date_string = postback_data['date_string']
+        area_id = postback_data['area_id']
+        distribution_place_id = postback_data['distribution_place_id']
+        bento_id = postback_data['bento_id']
+        print("date_string", date_string)
+        print("area_id", area_id)
+        print("distribution_place_id", distribution_place_id)
+        print("bento_id", bento_id)
+        messages = [
+            TextSendMessage(text="area_id: "+str(area_id)),
+            TextSendMessage(text="date_string: "+str(date_string)),
+            TextSendMessage(text="distribution_place_id: "+str(distribution_place_id)),
+            TextSendMessage(text="bento_id: "+str(bento_id))
+            ]
+
     line_bot_api.reply_message(
         event.reply_token,
         messages

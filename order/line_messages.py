@@ -52,7 +52,7 @@ def get_order_date_reply_messages(event):
 
 
 def get_area_reply_messages(event, date_string):
-    date = datetime(eval(*date_string))
+    date = datetime(*eval(date_string))
     bentos = Bento.objects.filter(date=date, ready=True)
     area_limitations = AreaLimitation.objects.filter(bento__in=bentos).values('area__id', 'area__area').annotate(total_remain=Sum('remain')).filter(total_remain__gt=0)
     # available_area_limitations = [(al['area__area'], al['total_remain']) for al in list(area_limitations) if al['total_remain'] > 0]
@@ -90,7 +90,7 @@ def get_area_reply_messages(event, date_string):
 
 
 def get_distribution_place_reply_messages(event, date_string, area_id):
-    date = datetime(eval(*date_string))
+    date = datetime(*eval(date_string))
     availables_distribution_places = DistributionPlace.objects.filter(area=int(area_id))
     availables_distribution_places_len = len(availables_distribution_places)
 
@@ -125,7 +125,7 @@ def get_distribution_place_reply_messages(event, date_string, area_id):
 
 
 def get_bento_reply_messages(event, date_string, area_id, distribution_place_id):
-    date = datetime(eval(*date_string))
+    date = datetime(*eval(date_string))
     available_bentos = AreaLimitation.objects.filter(area=int(area_id), bento__date=date, bento__ready=True).values('bento__id', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
     
     for bento in available_bentos:

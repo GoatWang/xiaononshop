@@ -52,7 +52,7 @@ def get_order_date_reply_messages(event):
         for btn in message_with_btns:
             actions.append(
                     PostbackTemplateAction(
-                            label=str(btn.month) + "月" + str(btn.day) + "日" + "(" + weekday_zh_mapping['btn.weekday()'] + ")",
+                            label=str(btn.month) + "月" + str(btn.day) + "日" + "(" + weekday_zh_mapping[btn.weekday()] + ")",
                             data= 'action=get_order_date_reply_messages&date_string='+str((btn.year, btn.month, btn.day))
                         )
                     )

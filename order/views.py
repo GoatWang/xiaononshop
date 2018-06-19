@@ -101,17 +101,7 @@ def _handle_postback_event(event):
         distribution_place_id = postback_data['distribution_place_id']
         bento_id = postback_data['bento_id']
         order_number = postback_data['order_number']
-
-        messages = []
-        order_detail_messages = get_order_confirmation_messages(event, date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
-        messages.extend(order_detail_messages)
-
-        line_profile = LineProfile.objects.get(line_id=line_id)
-        if not line_profile.phone:
-            line_profile.state = 'phone'
-            line_profile.save()
-            messages.extend([TextSendMessage(text="請留下您的電話，以方便我們聯絡您取餐: \nex. 0912345678")])
-    
+        messages = get_order_confirmation_messages(event, date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
     elif postback_data['action'] == 'get_order_confirmation_messages':
         date_string = postback_data['date_string']
         area_id = postback_data['area_id']
@@ -132,7 +122,12 @@ def _handle_postback_event(event):
             number=order_number
         )
 
-
+        line_profile = LineProfile.objects.get(line_id=line_id)
+        if not line_profile.phone:
+            line_profile.state = 'phone'
+            line_profile.save()
+            messages.extend([TextSendMessage(text="請留下您的電話，以方便我們聯絡您取餐: \nex. 0912345678")])
+    
 
         # print("date_string", date_string)
         # print("area_id", area_id)

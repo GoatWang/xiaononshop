@@ -254,23 +254,23 @@ def get_order_confirmation_messages(event, date_string, area_id, distribution_pl
                 "訂購人: " + user_name + "\n" + \
                 "品項: " + bento_string + "(" + str(order_number) + "個)\n" + \
                 "取餐地點: " + area_string + distrbution_place_string
-    buttons_template_message = TemplateSendMessage(
-            alt_text='訂單確認',
-            template=ButtonsTemplate(
-                title='訂單確認',
-                text=confirm_text,
-                actions=[
-                    PostbackTemplateAction(
-                            label="確認訂購",
-                            data= 'action=get_order_detail_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento_id)+'&order_number=' + str(order_number)
-                        ),
-                    PostbackTemplateAction(
-                            label="重新選擇品項",
-                            text="動作: 開始訂購",
-                            data= 'action=restart_order&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento_id)+'&order_number=' + str(order_number)
-                        )
-                ]
-            )
+
+    confirm_template_message = TemplateSendMessage(
+        alt_text='訂單確認',
+        template=ConfirmTemplate(
+            text=confirm_text,
+            actions=[
+                PostbackTemplateAction(
+                    label='確認',
+                    data= 'action=get_order_detail_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento_id)+'&order_number=' + str(order_number)
+                ),
+                MessageTemplateAction(
+                    label='取消',
+                    text='動作: 開始訂購'
+                )
+            ]
         )
-    messages = [buttons_template_message]
+    )
+
+    messages = [confirm_template_message]
     return messages

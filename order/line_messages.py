@@ -150,8 +150,9 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
         if bento['remain'] > 0:
             carousel_column = CarouselColumn(
                 thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
-                title=bento['bento__name'] + '剩餘: '+ str(bento['remain']) + '個',
-                text="類型: " + bento['bento__bento_type__bento_type'] + "\n" + "價格: " + str(bento['bento__price']) + "元\n" + "配菜: " + bento['bento__cuisine'],
+                title=bento['bento__name'] + '(剩餘'+ str(bento['remain']) + '個)',
+                # text="類型: " + bento['bento__bento_type__bento_type'] + "\n" + "價格: " + str(bento['bento__price']) + "元\n" + "配菜: " + bento['bento__cuisine'],
+                text=bento['bento__bento_type__bento_type'] + str(bento['bento__price']) + "元\n" + bento['bento__cuisine'],
                 actions=[
                     PostbackTemplateAction(
                         label='我要吃這個',
@@ -163,7 +164,7 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
             carousel_column = CarouselColumn(
                 thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
                 title=bento['bento__name'] + "(已售完)",
-                text="類型: " + bento['bento__bento_type__bento_type'] + "\n" + "價格: " + str(bento['bento__price']) + "元\n" + "配菜: " + bento['bento__cuisine'],
+                text=bento['bento__bento_type__bento_type'] + str(bento['bento__price']) + "元\n" + bento['bento__cuisine'],
                 # actions=[
                 #     PostbackTemplateAction(
                 #         label='重新開始訂購流程',

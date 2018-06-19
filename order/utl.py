@@ -1,4 +1,5 @@
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
+from xiaonon import settings
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 from datetime import datetime
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order

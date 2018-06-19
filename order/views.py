@@ -88,6 +88,7 @@ def _handle_postback_event(event):
         area_id = postback_data['area_id']
         distribution_place_id = postback_data['distribution_place_id']
         messages = get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
+        print(messages)
     elif postback_data['action'] == 'get_bento_reply_messages':
         date_string = postback_data['date_string']
         area_id = postback_data['area_id']

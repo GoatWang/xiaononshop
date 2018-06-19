@@ -165,13 +165,13 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
                 thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
                 title=bento['bento__name'] + "(已售完)",
                 text=bento['bento__bento_type__bento_type'] + str(bento['bento__price']) + "元\n" + bento['bento__cuisine'],
-                # actions=[
-                #     PostbackTemplateAction(
-                #         label='重新開始訂購流程',
-                #         text ='動作: 開始訂購'
-                #         # data='action=get_distribution_place_reply_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento['bento__id'])
-                #     ),
-                # ]
+                actions=[
+                    PostbackTemplateAction(
+                        label='重新開始訂購流程',
+                        text ='動作: 開始訂購'
+                        # data='action=get_distribution_place_reply_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento['bento__id'])
+                    ),
+                ]
             )
         carousel_columns.append(carousel_column)
 

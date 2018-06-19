@@ -161,29 +161,21 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
                     ),
                 ]
             )
-            print('thumbnail_image_url: ' + 'https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'])
-            print('title: ' + bento['bento__name'] + '(剩餘'+ str(bento['remain']) + '個)')
-            print('text: ' + bento['bento__bento_type__bento_type'] + str(bento['bento__price']) + "元\n" + bento['bento__cuisine'])
-            print('data: ' + 'action=get_distribution_place_reply_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento['bento__id']))
         else:
-            pass
-            # carousel_column = CarouselColumn(
-            #     thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
-            #     title=bento['bento__name'] + "(已售完)",
-            #     text=bento['bento__bento_type__bento_type'] + str(bento['bento__price']) + "元\n" + bento['bento__cuisine'],
-            #     # actions=[
-            #     #     PostbackTemplateAction(
-            #     #         label='重新開始訂購流程',
-            #     #         text ='動作: 開始訂購'
-            #     #         # data='action=get_distribution_place_reply_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento['bento__id'])
-            #     #     ),
-            #     # ]
-            # )
-            print('thumbnail_image_url: ' + 'https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'])
-            print('title: ' + bento['bento__name'] + "(已售完)")
-            print('text: ' + bento['bento__bento_type__bento_type'] + str(bento['bento__price']) + "元\n" + bento['bento__cuisine'])
+            carousel_column = CarouselColumn(
+                thumbnail_image_url='https://s3.amazonaws.com/xiaonon/' + bento['bento__photo'],
+                title=bento['bento__name'] + "(已售完)",
+                text=bento['bento__bento_type__bento_type'] + str(bento['bento__price']) + "元\n" + bento['bento__cuisine'],
+                actions=[
+                    PostbackTemplateAction(
+                        label='重新開始訂購流程',
+                        text ='動作: 開始訂購',
+                        date ='action=restart'
+                        # data='action=get_distribution_place_reply_messages&date_string='+date_string+"&area_id="+str(area_id)+"&distribution_place_id="+str(distribution_place_id)+"&bento_id="+str(bento['bento__id'])
+                    ),
+                ]
+            )
         carousel_columns.append(carousel_column)
-    print(carousel_columns)
     carousel_template_message = TemplateSendMessage(
         alt_text='飯盒類型選擇',
         template=CarouselTemplate(

@@ -101,13 +101,17 @@ def _handle_postback_event(event):
         distribution_place_id = postback_data['distribution_place_id']
         bento_id = postback_data['bento_id']
         order_number = postback_data['order_number']
-        line_profile = LineProfile.objects.get(line_id=line_id)
+
+        target_line_profile = LineProfile.objects.get(line_id=line_id)
+        target_bento = Bento.objects.get(id=bento_id)
+        target_area = Area.objects.get(id=area_id)
+        target_distribution_place = DistributionPlace.objects.get(distribution_place_id)
         # complete order process
         Order.objects.create(
-            line_profile=line_profile,
-            bento=bento_id,
-            area=area_id,
-            distribution_place=distribution_place_id,
+            line_profile=target_line_profile,
+            bento=target_bento,
+            area=target_area,
+            distribution_place=target_distribution_place,
             number=order_number
         )
         messages = []

@@ -1,5 +1,6 @@
 from xiaonon import settings
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
+from django.db.models import Sum
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError

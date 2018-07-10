@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django import forms
 import json
+from datetime import datetime, timedelta
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
-
+from django.db.models import Sum
 admin.site.register(Job)
 
 
@@ -75,9 +76,38 @@ admin.site.register(DistributionPlace)
 class AreaLimitationAdmin(admin.ModelAdmin):
     list_display = ["bento", "area", "limitation", "remain"]
     ordering = ["bento", "area", "limitation", "remain"]
-
 admin.site.register(AreaLimitation, AreaLimitationAdmin)
-admin.site.register(Order)
+
+
+# --------------------------------------------------------------------------
+# Order
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ["line_profile", "bento", "distribution_place", "number", "create_time"]
+    ordering = ["bento", "distribution_place", "create_time"]
+admin.site.register(Order, OrderAdmin)
+
+
+
+# --------------------------------------------------------------------------
+# Order Custom
+class CustomOrder(Order):
+    class Meta:
+        proxy = True
+
+# class CustomOrderAdmin(admin.ModelAdmin):
+#     list_display = ['bento', 'distribution_place', 'total_count_count']
+#     # ordering = ["bento__date", "bento__name", 'area__area', "create_time"]
+
+#     def total_count_count(self, obj):
+#       return obj.total_count
+#     total_count_count.short_description = 'Total Order Count'
+#     # total_count_count.admin_order_field = 'total_count'
+
+#     def queryset(self, request):
+#         qs = super(CustomOrderAdmin, self).queryset(request)
+#         return qs.filter(bento__date__gt=datetime.now().date()-timedelta(1)).annotate(total_count=Sum('number')) #.values('bento__date', 'bento__name', 'area__area', 'distribution_place__distribution_place', 'total_count')
+
+# admin.site.register(CustomOrder, CustomOrderAdmin)
 
 
 

@@ -23,6 +23,9 @@ def get_order_date_reply_messages(event):
     available_dates = sorted(list(set(Bento.objects.filter(date__gt=datetime.now().date(), ready=True).values_list('date', flat=True))))[:maximum_futere_days_for_ordering]
     available_dates_len = len(available_dates)
     
+    if available_dates_len <= 0:
+        return [TextSendMessage(text="近期沒有供應餐盒，開學才會開始供應餐盒喔!")]
+
     messages_count = available_dates_len // 4
     messages_count = messages_count + 1 if available_dates_len%4 != 0 else messages_count
 

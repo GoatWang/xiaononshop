@@ -87,12 +87,6 @@ def _handle_postback_event(event):
     
     if postback_data['action'] == 'get_order_date_reply_messages':
         date_string = postback_data['date_string']
-        print('date_string', date_string)
-        print('date_string', date_string)
-        print('date_string', date_string)
-        print('date_string', date_string)
-        print('date_string', date_string)
-        print('date_string', date_string)
         messages = get_area_reply_messages(event, date_string)
     elif postback_data['action'] == 'get_area_reply_messages':
         date_string = postback_data['date_string']

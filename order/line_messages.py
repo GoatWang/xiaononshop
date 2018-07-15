@@ -63,12 +63,6 @@ def get_order_date_reply_messages(event):
                             data= 'action=get_order_date_reply_messages&date_string='+date_to_url_string(btn)
                         )
                     )
-            print('date_to_url_string(btn)', date_to_url_string(btn))
-            print('date_to_url_string(btn)', date_to_url_string(btn))
-            print('date_to_url_string(btn)', date_to_url_string(btn))
-            print('date_to_url_string(btn)', date_to_url_string(btn))
-            print('date_to_url_string(btn)', date_to_url_string(btn))
-            print('date_to_url_string(btn)', date_to_url_string(btn))
         
         buttons_template_message = TemplateSendMessage(
                 alt_text='訂餐日期選擇',
@@ -92,6 +86,14 @@ def get_area_reply_messages(event, date_string):
     messages_count = available_area_limitations_len // 4
     messages_count = messages_count + 1 if available_area_limitations_len%4 != 0 else messages_count
 
+    print("date", date)
+    print("bentos", bentos)
+    print("area_limitations", area_limitations)
+    print("available_area_limitations", available_area_limitations)
+    print("available_area_limitations_len", available_area_limitations_len)
+    print("messages_count", messages_count)
+
+
     messages_with_btns = []
     for i in range(messages_count):
         messages_with_btns.append(available_area_limitations[i*4:(i+1)*4].copy())
@@ -100,6 +102,8 @@ def get_area_reply_messages(event, date_string):
     for message_with_btns in messages_with_btns:
         actions = []
         for btn in message_with_btns:
+            print('label', college_simplify_mapping.get(btn['area__area'], btn['area__area']) + '(剩餘' + str(btn['total_remain']) + '個)')
+            print('data', 'action=get_area_reply_messages&date_string='+date_string+"&area_id="+str(btn['area__id']))
             actions.append(
                     PostbackTemplateAction(
                             label=college_simplify_mapping.get(btn['area__area'], btn['area__area']) + '(剩餘' + str(btn['total_remain']) + '個)',

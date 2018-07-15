@@ -49,9 +49,9 @@ def get_order_date_reply_messages(event):
     messages_count = available_dates_len // 4
     messages_count = messages_count + 1 if available_dates_len%4 != 0 else messages_count
 
-messages_with_btns = []
-for i in range(messages_count):
-    messages_with_btns.append(available_dates[i*4:(i+1)*4].copy())
+    messages_with_btns = []
+    for i in range(messages_count):
+        messages_with_btns.append(available_dates[i*4:(i+1)*4].copy())
 
     messages = []
     for message_with_btns in messages_with_btns:

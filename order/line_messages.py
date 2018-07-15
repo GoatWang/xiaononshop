@@ -18,6 +18,26 @@ parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 from datetime import datetime
 from order.utl import weekday_zh_mapping, college_simplify_mapping, date_to_zh_string, date_to_url_string, url_string_to_date, get_order_detail
 
+def get_web_create_order_messages(event, pwd, line_id):
+        message = TemplateSendMessage(
+            alt_text='網頁訂購',
+            template=ButtonsTemplate(
+                # thumbnail_image_url='https://example.com/image.jpg',
+                title='請記住您的訂購密碼',
+                text='密碼: '+ pwd,
+                actions=[
+                    URITemplateAction(
+                        label='前往訂購',
+                        uri=settings.DOMAIN + 'order/order_create/'
+                    )
+                ]
+            )
+        )
+        messages = [message]
+        return messages
+
+
+
 def get_order_date_reply_messages(event):
     maximum_futere_days_for_ordering = 14
     available_dates = sorted(list(set(Bento.objects.filter(date__gt=datetime.now().date(), ready=True).values_list('date', flat=True))))[:maximum_futere_days_for_ordering]
@@ -29,9 +49,9 @@ def get_order_date_reply_messages(event):
     messages_count = available_dates_len // 4
     messages_count = messages_count + 1 if available_dates_len%4 != 0 else messages_count
 
-    messages_with_btns = []
-    for i in range(messages_count):
-        messages_with_btns.append(available_dates[i*4:(i+1)*4].copy())
+messages_with_btns = []
+for i in range(messages_count):
+    messages_with_btns.append(available_dates[i*4:(i+1)*4].copy())
 
     messages = []
     for message_with_btns in messages_with_btns:

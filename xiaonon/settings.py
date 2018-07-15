@@ -177,4 +177,7 @@ LINE_CHANNEL_ACCESS_TOKEN = pwddata['LINE_CHANNEL_ACCESS_TOKEN']
 LINE_CHANNEL_SECRET = pwddata['LINE_CHANNEL_SECRET']
 
 
+DOMAIN = 'https://xiaononshop.com/'
+
+
 

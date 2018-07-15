@@ -5,13 +5,13 @@ from datetime import datetime
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 
 weekday_zh_mapping = {
-    1: "一",
-    2: "二",
-    3: "三",
-    4: "四",
-    5: "五",
-    6: "六",
-    7: "日"
+    0: "一",
+    1: "二",
+    2: "三",
+    3: "四",
+    4: "五",
+    5: "六",
+    6: "日"
 }
 
 college_simplify_mapping = {
@@ -31,6 +31,13 @@ def date_to_url_string(date):
 def url_string_to_date(url_string):
     return datetime(*eval(url_string))
 
+def parse_url_query_string(query_string):
+    data = {}
+    pairs = query_string.split('&')
+    for pair in pairs:
+        key, value = pair.split('=')
+        data[key] = value
+    return data
 
 def get_order_detail(date_string, area_id, distribution_place_id, bento_id, order_number, line_id):
     user_name = line_bot_api.get_profile(line_id).display_name

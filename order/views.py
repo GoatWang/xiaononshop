@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from xiaonon import settings
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
-from order.utl import get_order_detail
+from order.utl import get_order_detail, parse_url_query_string
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -18,19 +18,19 @@ from linebot.models import (
 )
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
-from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_confirmation_messages
+from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_confirmation_messages, get_web_create_order_messages
+import numpy as np
 
+
+# ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
+def order_create(request):
+    context = {}
+    return render(request, 'order/order_create.html', context)
 
-def parse_url_query_string(query_string):
-    data = {}
-    pairs = query_string.split('&')
-    for pair in pairs:
-        key, value = pair.split('=')
-        data[key] = value
-    return data
+# ------------------------following are line bot---------------------------------------------
 
 def _handle_follow_event(event):
     line_id = event.source.user_id
@@ -59,12 +59,19 @@ def _handle_text_msg(event):
 
     if text == "動作: 開始訂購":
         messages = get_order_date_reply_messages(event)
+    elif text == "動作: 多筆訂購":
+        pwd = ''.join(np.random.randint(0, 9, 6).astype(str))
+        line_profile.state = pwd
+        line_profile.save()
+        messages = get_web_create_order_messages(event, pwd, line_id)
 
     elif line_profile_state == "phone":
         line_profile.phone = str(text)
         line_profile.state = "None"
         line_profile.save()
         messages = [TextSendMessage(text="您的電話號碼已經設定完成，謝謝您的配合。")]
+    else:
+        messages = [TextSendMessage(text="小農聽不懂您的意思，麻煩妳連絡客服人員喔!")]
         
     # elif text == "動作: 飯盒菜單":
     # elif text == "動作: 聯絡我們":

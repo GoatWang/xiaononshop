@@ -63,6 +63,12 @@ def get_order_date_reply_messages(event):
                             data= 'action=get_order_date_reply_messages&date_string='+date_to_url_string(btn)
                         )
                     )
+            print('date_to_url_string(btn)', date_to_url_string(btn))
+            print('date_to_url_string(btn)', date_to_url_string(btn))
+            print('date_to_url_string(btn)', date_to_url_string(btn))
+            print('date_to_url_string(btn)', date_to_url_string(btn))
+            print('date_to_url_string(btn)', date_to_url_string(btn))
+            print('date_to_url_string(btn)', date_to_url_string(btn))
         
         buttons_template_message = TemplateSendMessage(
                 alt_text='訂餐日期選擇',

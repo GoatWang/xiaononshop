@@ -1,0 +1,35 @@
+{% extends "order/layout.html" %}
+{% load staticfiles %}
+
+
+{% block scripts_top %}
+{% endblock %}
+
+
+{% block styles %}
+{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+<div class="row">
+    <div>
+        <input/>
+    </div>
+
+
+
+    <div class="dropdown">
+    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+        Dropdown
+    <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+        {% for area in areas %}
+            <li>{{ area.area }}</li>
+        {% endfor %}
+    </ul>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{% endblock %}

@@ -63,7 +63,7 @@ class AreaLimitation(models.Model):
     def __str__(self):
         return str(self.bento) + "_" + str(self.area)
     class Meta:
-        unique_together = (("bento", "area"),)
+        unique_together = (("bento", "area"), )
     
 class Order(models.Model):
     line_profile = models.ForeignKey('LineProfile', on_delete=models.CASCADE, verbose_name="Line名稱")

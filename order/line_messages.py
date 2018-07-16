@@ -28,7 +28,7 @@ def get_web_create_order_messages(event, pwd, line_id):
                 actions=[
                     URITemplateAction(
                         label='前往訂購',
-                        uri=settings.DOMAIN + 'order/order_create/'
+                        uri=settings.DOMAIN + 'order/order_create/' + line_id + '/'
                     )
                 ]
             )

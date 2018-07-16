@@ -26,9 +26,16 @@ import numpy as np
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
-def order_create(request):
-    context = {}
-    return render(request, 'order/order_create.html', context)
+def order_create(request, line_id):
+    if request.method == "GET":
+        context = {
+            'title':'多筆訂購',
+            'areas':Area.objects.all()
+        }
+        return render(request, 'order/order_create.html', context)
+    else:
+        pass
+
 
 # ------------------------following are line bot---------------------------------------------
 
@@ -61,7 +68,7 @@ def _handle_text_msg(event):
         messages = get_order_date_reply_messages(event)
     elif text == "動作: 多筆訂購":
         pwd = ''.join(np.random.randint(0, 9, 6).astype(str))
-        line_profile.state = pwd
+        line_profile.state = "web_pwd:" + pwd
         line_profile.save()
         messages = get_web_create_order_messages(event, pwd, line_id)
 

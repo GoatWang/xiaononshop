@@ -20,7 +20,7 @@ line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_confirmation_messages, get_web_create_order_messages
 import numpy as np
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 
 # ------------------------following are website----------------------------------------------
@@ -35,7 +35,7 @@ def order_create(request, area=1, line_id=0):
         for dp in distribution_places:
             output_adps.append(a.area + "--" + dp.distribution_place)
 
-    available_bentos = AreaLimitation.objects.filter(area=area, bento__date__gt=datetime.now(), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+    available_bentos = AreaLimitation.objects.filter(area=area, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
     available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
     # {'bento__id': 26, 
     # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]

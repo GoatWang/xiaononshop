@@ -96,8 +96,8 @@
     $(".numberInput").change(function(){
         $("#summaryTable tbody").empty()
         subtotals = []
-        $(".card").each(function(i,v){
-            idx = (i+1).toString()
+        rowCounts = 0
+        $(".card").each(function(){
             date = $(this).find(".dateTypeP").text().split(" ")[0]
             name = $(this).find(".bentoNameH4").text().split("(")[0]
             number = $(this).find(".numberInput").val()
@@ -105,8 +105,9 @@
             subtotal = (Number(number)*Number(price)).toString()
 
             if(number != "" && number != '0'){
+                rowCounts += 1
                 tr = $("<tr>")
-                idx_td = $("<td>").attr("scope", 'row').text(idx)
+                idx_td = $("<td>").attr("scope", 'row').text(rowCounts)
                 date_td = $("<td>").text(date)
                 name_td = $("<td>").text(name)
                 price_td = $("<td>").text(price)
@@ -120,8 +121,6 @@
 
         sumOfSubtotals = 0
         $(subtotals).each(function(i,v){
-            console.log(i)
-            console.log(v)
             sumOfSubtotals += Number(v)
         })
         $("#priceTotalLabel font").text(sumOfSubtotals.toString())

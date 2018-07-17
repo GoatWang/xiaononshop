@@ -19,5 +19,5 @@ body {
 }
 
 #maincontainer{
-  height: 300px;
+  min-height: 430px;
 }

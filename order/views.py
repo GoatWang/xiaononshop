@@ -20,17 +20,42 @@ line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_confirmation_messages, get_web_create_order_messages
 import numpy as np
-
+from datetime import datetime
+import pandas as pd
 
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 def order_create(request, line_id):
+    areas = Area.objects.all()
+    output_adps = [] # area and distributions
+    for a in areas:
+        distribution_places = DistributionPlace.objects.filter(area=a)
+        for dp in distribution_places:
+            output_adps.append(a.area + "--" + dp.distribution_place)
+
+    available_bentos = AreaLimitation.objects.filter(area=areas[0], bento__date__gt=datetime.now(), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+    available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
+    # {'bento__id': 26, 
+    # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
+    aws_url = "https://s3.amazonaws.com/xiaonon/"
+    df_available_bentos = pd.DataFrame(available_bentos)
+    df_available_bentos['id'] = df_available_bentos['bento__id']
+    df_available_bentos['name'] = df_available_bentos['bento__name']
+    df_available_bentos['bento_type'] = df_available_bentos['bento__bento_type__bento_type']
+    df_available_bentos['cuisine'] = df_available_bentos['bento__cuisine']
+    df_available_bentos['photo'] = df_available_bentos['bento__photo'].apply(lambda x:aws_url + x)
+    df_available_bentos['price'] = df_available_bentos['bento__price']
+    df_available_bentos['remain'] = df_available_bentos['remain']
+    df_available_bentos = df_available_bentos[["id", "name", "bento_type", "cuisine", "photo", "price", "remain"]]
+    available_bentos = df_available_bentos.T.to_dict().values()
+
     if request.method == "GET":
         context = {
             'title':'多筆訂購',
-            'areas':Area.objects.all()
+            'apds':output_adps,
+            'available_bentos':available_bentos,
         }
         return render(request, 'order/order_create.html', context)
     else:

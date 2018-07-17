@@ -10,7 +10,7 @@ class Job(models.Model):
         return str(self.job)
 
 class LineProfile(models.Model):
-    # user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     line_id = models.CharField(max_length=50, primary_key=True, verbose_name="LineID")
     line_name = models.CharField(max_length=100, verbose_name="Line名稱")
     line_picture_url = models.URLField(verbose_name="Line照片網址")

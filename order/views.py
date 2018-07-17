@@ -27,7 +27,7 @@ import pandas as pd
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
-def order_create(request, line_id):
+def order_create(request, area=1, line_id=0):
     areas = Area.objects.all()
     output_adps = [] # area and distributions
     for a in areas:
@@ -35,7 +35,7 @@ def order_create(request, line_id):
         for dp in distribution_places:
             output_adps.append(a.area + "--" + dp.distribution_place)
 
-    available_bentos = AreaLimitation.objects.filter(area=areas[0], bento__date__gt=datetime.now(), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+    available_bentos = AreaLimitation.objects.filter(area=area, bento__date__gt=datetime.now(), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
     available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
     # {'bento__id': 26, 
     # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
@@ -43,12 +43,14 @@ def order_create(request, line_id):
     df_available_bentos = pd.DataFrame(available_bentos)
     df_available_bentos['id'] = df_available_bentos['bento__id']
     df_available_bentos['name'] = df_available_bentos['bento__name']
+    df_available_bentos['date'] = df_available_bentos['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
     df_available_bentos['bento_type'] = df_available_bentos['bento__bento_type__bento_type']
     df_available_bentos['cuisine'] = df_available_bentos['bento__cuisine']
     df_available_bentos['photo'] = df_available_bentos['bento__photo'].apply(lambda x:aws_url + x)
     df_available_bentos['price'] = df_available_bentos['bento__price']
-    df_available_bentos['remain'] = df_available_bentos['remain']
-    df_available_bentos = df_available_bentos[["id", "name", "bento_type", "cuisine", "photo", "price", "remain"]]
+    df_available_bentos['remain'] = df_available_bentos['remain'].astype(str)
+    df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain"]]
+    df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
     available_bentos = df_available_bentos.T.to_dict().values()
 
     if request.method == "GET":

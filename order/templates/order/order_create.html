@@ -8,56 +8,123 @@
 
 {% block styles %}
 <style>
-    .form-control{
-        width: 100%;    
+    .card-title {
+        font-size: 18px;
     }
-    form {
-        width: 100%;
+    .card-text {
+        margin-top:2px;
+        margin-bottom:2px;
+    }
+    #priceTotalLabel font {
+        color:red;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <h2>{{ title }}</h2>
-<div class="row">
+<h4>學校--取餐地點</h4>
+<form>
+    <div class="form-group">
+        <select class="form-control" id="adpSelect">
+        {% for adp in apds %}
+        <option>{{ adp }}</option>
+        {% endfor %}
+        </select>
+    </div>
+</form>
 
-    <h4>學校--取餐地點</h4>
-    <form width="100%">
-        <div class="form-group">
-            <!-- <label for="adpSelect">學校--取餐地點</label> -->
-            <select class="form-control" id="adpSelect">
-            {% for adp in apds %}
-            <option>{{ adp }}</option>
-            {% endfor %}
-            </select>
-        </div>
-    </form>
-
-    <h4>飯盒</h4>
-    <div class="row text-center">
-        {% for bento in available_bentos %}
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card">
-                <img class="card-img-top" src="{{ bento.photo }}" alt="">
-                <div class="card-body">
-                    <h4 class="card-title">{{ bento.name }}</h4>
-                    <p class="card-text">{{ bento.cuisine }}</p>
-                </div>
-                <div class="card-footer">
-                    <a href="#" class="btn btn-primary">+1</a>
+<h4>飯盒</h4>
+<div class="row text-center">
+    {% for bento in available_bentos %}
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card">
+            <img class="card-img-top" src="{{ bento.photo }}" alt="">
+            <div class="card-body">
+                <h4 class="card-title bentoNameH4"><strong>{{ bento.name }}(剩餘{{ bento.remain }}個)</strong></h4>
+                <p class="card-text dateTypeP">{{ bento.date }} {{ bento.bento_type }}</p>
+                <p class="card-text">{{ bento.cuisine }}</p>
+            </div>
+            <div class="card-footer">
+                <div class="form-group row">
+                    <label for="numberInput{{ bento.id }}" class="col-5 col-form-label priceLabel">{{ bento.price }}元</label>
+                    <div class="col-5">
+                        <input class="form-control numberInput" type="number" value="0" id="numberInput{{ bento.id }}"  max="{{ bento.remain }}" min="0">
+                    </div>
+                    <label  class="col-2 col-form-label">個</label>
                 </div>
             </div>
         </div>
-        {% endfor %}
     </div>
-
-
+    {% endfor %}
 </div>
+
+<h4>結帳</h4>
+<div id="summaryTableDiv" class="row text-center">
+    <table class="table" id="summaryTable">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">日期</th>
+                <th scope="col">飯盒</th>
+                <th scope="col">單價</th>
+                <th scope="col">個數</th>
+                <th scope="col">小計</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+            </tr> -->
+        </tbody>
+    </table>
+</div>
+
+<h4 id="priceTotalLabel">總計<font>0</font>元<h4/>
+
 {% endblock %}
 {% block scripts %}
 <script>
     $("#adpSelect").change(function(){
         console.log($(this).val())
+    })
+
+
+    $(".numberInput").change(function(){
+        $("#summaryTable tbody").empty()
+        subtotals = []
+        $(".card").each(function(i,v){
+            idx = (i+1).toString()
+            date = $(this).find(".dateTypeP").text().split(" ")[0]
+            name = $(this).find(".bentoNameH4").text().split("(")[0]
+            number = $(this).find(".numberInput").val()
+            price = $(this).find(".priceLabel").text().replace("元", "")
+            subtotal = (Number(number)*Number(price)).toString()
+
+            if(number != "" && number != '0'){
+                tr = $("<tr>")
+                idx_td = $("<td>").attr("scope", 'row').text(idx)
+                date_td = $("<td>").text(date)
+                name_td = $("<td>").text(name)
+                price_td = $("<td>").text(price)
+                number_td = $("<td>").text(number)
+                subtotal_td = $("<td>").text(subtotal)
+                tr.append(idx_td).append(date_td).append(name_td).append(price_td).append(number_td).append(subtotal_td)
+                $("#summaryTable tbody").append(tr)
+                subtotals.push(subtotal)
+            }
+        })
+
+        sumOfSubtotals = 0
+        $(subtotals).each(function(i,v){
+            console.log(i)
+            console.log(v)
+            sumOfSubtotals += Number(v)
+        })
+        $("#priceTotalLabel font").text(sumOfSubtotals.toString())
     })
 </script>
 

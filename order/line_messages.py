@@ -205,7 +205,7 @@ def get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
 
 def get_order_number_messages(event, date_string, area_id, distribution_place_id, bento_id):
     remain = AreaLimitation.objects.get(area=int(area_id), bento=int(bento_id)).remain
-    order_count = 7 if remain < 7 else remain
+    order_count = 7 if remain >= 7 else remain
     availables_order_count = [i+1 for i in range(order_count)]
     # availables_order_count.append(-1) # 更多數量
     availables_order_count_len = len(availables_order_count)

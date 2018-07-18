@@ -18,21 +18,32 @@
     #priceTotalLabel font {
         color:red;
     }
+
+    #area_distribution_dropdown_div {
+        margin-bottom: 15px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <h2>{{ title }}</h2>
 <h4>學校--取餐地點</h4>
-<form>
-    <div class="form-group">
-        <select class="form-control" id="adpSelect">
+<div class="dropdown" id='area_distribution_dropdown_div'>
+    <button class="btn btn-outline-secondary btn-block dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        {{ selected_adp_option_text }}
+    </button>
+    <div class="dropdown-menu  col-lg-12" aria-labelledby="dropdownMenuButton">
         {% for adp in apds %}
-        <option>{{ adp }}</option>
+            {% if adp.selected %}
+            <a class="dropdown-item active" href="{% url 'order:order_create' area_id=adp.area_id distribution_place_id=adp.distribution_place_id %}">{{ adp.option_text }}</a>
+            {% else %}
+            <a class="dropdown-item" href="{% url 'order:order_create' area_id=adp.area_id distribution_place_id=adp.distribution_place_id %}">{{ adp.option_text }}</a>
+            {% endif %}
         {% endfor %}
-        </select>
     </div>
-</form>
+</div>
+
+
 
 <h4>飯盒</h4>
 <div class="row text-center">
@@ -49,7 +60,11 @@
                 <div class="form-group row">
                     <label for="numberInput{{ bento.id }}" class="col-5 col-form-label priceLabel">{{ bento.price }}元</label>
                     <div class="col-5">
-                        <input class="form-control numberInput" type="number" value="0" id="numberInput{{ bento.id }}"  max="{{ bento.remain }}" min="0">
+                        <select class="form-control numberInput">
+                            {% for i in bento.select_range %}
+                                <option>{{ i }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <label  class="col-2 col-form-label">個</label>
                 </div>
@@ -88,10 +103,6 @@
 {% endblock %}
 {% block scripts %}
 <script>
-    $("#adpSelect").change(function(){
-        console.log($(this).val())
-    })
-
 
     $(".numberInput").change(function(){
         $("#summaryTable tbody").empty()

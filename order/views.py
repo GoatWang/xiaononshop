@@ -27,15 +27,26 @@ import pandas as pd
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
-def order_create(request, area=1, line_id=0):
+def order_create(request, area_id=1, distribution_place_id=1, line_id=0):
     areas = Area.objects.all()
     output_adps = [] # area and distributions
+    selected_adp_option_text = ""
     for a in areas:
         distribution_places = DistributionPlace.objects.filter(area=a)
         for dp in distribution_places:
-            output_adps.append(a.area + "--" + dp.distribution_place)
+            adp_dict = {
+                "option_text":a.area + "--" + dp.distribution_place,
+                "area_id":a.id,
+                "distribution_place_id":dp.id,
+            }
+            if area_id==a.id and distribution_place_id==dp.id:
+                adp_dict['selected'] = True  
+                selected_adp_option_text = a.area + "--" + dp.distribution_place
+            else:
+                adp_dict['selected'] = False
+            output_adps.append(adp_dict)
 
-    available_bentos = AreaLimitation.objects.filter(area=area, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+    available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
     available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
     # {'bento__id': 26, 
     # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
@@ -49,7 +60,9 @@ def order_create(request, area=1, line_id=0):
     df_available_bentos['photo'] = df_available_bentos['bento__photo'].apply(lambda x:aws_url + x)
     df_available_bentos['price'] = df_available_bentos['bento__price']
     df_available_bentos['remain'] = df_available_bentos['remain'].astype(str)
-    df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain"]]
+    df_available_bentos['select_range'] = df_available_bentos['remain'].apply(lambda x:list(range(0, 11)) if int(x)>=10 else list(range(0, int(x)+1)))
+
+    df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain", "select_range"]]
     df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
     available_bentos = df_available_bentos.T.to_dict().values()
 
@@ -57,6 +70,7 @@ def order_create(request, area=1, line_id=0):
         context = {
             'title':'多筆訂購',
             'apds':output_adps,
+            'selected_adp_option_text':selected_adp_option_text,
             'available_bentos':available_bentos,
         }
         return render(request, 'order/order_create.html', context)

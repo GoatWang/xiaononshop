@@ -128,8 +128,14 @@ def order_create(request, area_id=1, distribution_place_id=1):
         if request.method == "POST":
             postdata = request.POST
             user = request.user
-            print(postdata)
-            print(user)
+            lineprofile = LineProfile(user=user)
+            line_id = lineprofile.line_id
+            
+            line_bot_api.push_message(
+                line_id,
+                TextSendMessage("以已經訂購成功，以下是您的訂單資訊。")
+            )
+
             return JsonResponse({
                 "postdata":str(postdata),
                 "user":str(user)

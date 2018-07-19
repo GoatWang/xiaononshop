@@ -126,7 +126,8 @@ def order_create(request, area_id=1, distribution_place_id=1):
             }
             return render(request, 'order/order_create.html', context)
         if request.method == "POST":
-            order_data = request.POST['orderData']
+            post_data = request.POST
+            order_data = post_data['orderData']
             user = request.user
             lineprofile = LineProfile.objects.get(user=user)
 
@@ -143,16 +144,15 @@ def order_create(request, area_id=1, distribution_place_id=1):
             
             if all_success: 
                 res_message = "已經訂購成功，以下是您的訂單資訊。" #TODO: 回饋訂單查詢URL
-                state = True
             else: 
                 res_message = "部分訂單因數量不足，請從新訂購。" #TODO: 回饋失敗部分
-                state = False
 
             line_bot_api.push_message(
                 line_id,
                 TextSendMessage(text=res_message)
             )
-            return JsonResponse({"state":state})
+            return JsonResponse({"success":all_success})
+            # return JsonResponse({"state":True})
 
 
 

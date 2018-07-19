@@ -160,8 +160,8 @@
         
         orderData = []
         currentUrl = window.location.href 
-        area_id = isNaN(currentUrl.split()[5]) ? currentUrl.split()[5]:1
-        distribution_place_id = isNaN(currentUrl.split()[6]) ? currentUrl.split()[6]:1
+        area_id = !isNaN(currentUrl.split()[5]) ? currentUrl.split()[5]:1
+        distribution_place_id = !isNaN(currentUrl.split()[6]) ? currentUrl.split()[6]:1
         $(".card").each(function(){
             id = $(this).find(".idP").text().replace("元", "")
             number = $(this).find(".numberInput").val()

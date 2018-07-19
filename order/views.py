@@ -130,15 +130,15 @@ def order_create(request, area_id=1, distribution_place_id=1):
             order_data = post_data['orderData']
             user = request.user
             lineprofile = LineProfile.objects.get(user=user)
-
             line_id = lineprofile.line_id
 
             all_success = True
-            for od in order_data:
-                bento_id = od['bento_id']
-                order_number = od['order_number']
-                area_id = od['area_id']
-                distribution_place_id = od['distribution_place_id']
+            for od in eval(order_data):
+                print("od", od)
+                bento_id = int(od['bento_id'])
+                order_number = int(od['order_number'])
+                area_id = int(od['area_id'])
+                distribution_place_id = int(od['distribution_place_id'])
                 success = create_order(line_id, bento_id, order_number, area_id, distribution_place_id)
                 if not success: all_success=False
             

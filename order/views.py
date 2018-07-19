@@ -27,6 +27,8 @@ import pandas as pd
 from uuid import uuid4
 from urllib.parse import parse_qs, urlparse
 import requests
+from base64 import urlsafe_b64decode
+import re
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -54,7 +56,16 @@ def line_login_callback(request):
     }
     res = requests.post('https://api.line.me/oauth2/v2.1/token', data=post_data, headers=headers)
     print("res.text", res.text)
-    return HttpResponse("url: " + url + ", " + "query_string: " + query_string + ", " + "query_dict: " + str(query_dict))
+
+    line_login_profile = eval(re.findall(b'\{.+?\}', urlsafe_b64decode(res.text + "="))[1].decode())
+    print("line_login_profile", line_login_profile)
+    print("email", line_login_profile['email'])
+    print("name", line_login_profile['name'])
+    print("line_id", line_login_profile['sub'])
+    print("picture", line_login_profile['picture'])
+
+    httptext = "email: " + line_login_profile['email'] +"name: " + line_login_profile['name'] +"line_id: " + line_login_profile['sub'] +"picture: " + line_login_profile['picture']
+    return HttpResponse(httptext)
 
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:

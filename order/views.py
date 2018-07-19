@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
+
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from xiaonon import settings
@@ -30,11 +31,17 @@ from urllib.parse import parse_qs, urlparse
 import requests
 from base64 import urlsafe_b64decode
 import re
+def redirect_self(request, to):
+    domain = request.META['HTTP_HOST']
+    if domain.startswith("127"):
+        return redirect("http://" + domain + "/" + to)
+    else:
+        return redirect("https://" + domain + "/" + to)
+
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
-    # return redirect('order_create/')
-
+    # return redirect_self(request, "order/order_create/")
 
 def line_login_callback(request):
     url = request.path
@@ -61,7 +68,8 @@ def line_login_callback(request):
     lineprofile = LineProfile.objects.get(line_id=line_id)
     user = lineprofile.user
     auth.login(request, user)
-    return redirect(order_create)
+    return redirect_self(request, "order/order_create/")
+
 
 @csrf_exempt
 def order_create(request, area_id=1, distribution_place_id=1):

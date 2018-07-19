@@ -40,7 +40,7 @@ def line_login_callback(request):
     print(request.POST)
     print(request.GET)
     # return redirect(callback_viewfun)
-    return HttpResponse("url: " + url + ", " + "query_string: " + query_string + ", " + "query_dict: " + str(query_dict) + ", " + "callback_viewfun: " + callback_viewfun)
+    return HttpResponse("url: " + url + ", " + "query_string: " + query_string + ", " + "query_dict: " + str(query_dict))
 
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:

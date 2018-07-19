@@ -151,7 +151,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 line_id,
                 TextSendMessage(text=res_message)
             )
-            return JsonResponse({"success":all_success})
+            return JsonResponse({"success":all_success, 'message':res_message})
             # return JsonResponse({"state":True})
 
 

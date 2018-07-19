@@ -33,6 +33,8 @@ import re
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
+    # return redirect('order_create/')
+
 
 def line_login_callback(request):
     url = request.path
@@ -59,7 +61,7 @@ def line_login_callback(request):
     lineprofile = LineProfile.objects.get(line_id=line_id)
     user = lineprofile.user
     auth.login(request, user)
-    return redirect('order_create')
+    return redirect('order_create/')
 
 @csrf_exempt
 def order_create(request, area_id=1, distribution_place_id=1):

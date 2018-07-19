@@ -61,7 +61,7 @@ def line_login_callback(request):
     lineprofile = LineProfile.objects.get(line_id=line_id)
     user = lineprofile.user
     auth.login(request, user)
-    return redirect('order_create/')
+    return redirect(order_create)
 
 @csrf_exempt
 def order_create(request, area_id=1, distribution_place_id=1):
@@ -122,8 +122,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
             user = request.user
             print(postdata)
             print(user)
-            pass
-
+            return HttpResponse(str(postdata) + ", " + str(user))
 
 # ------------------------following are line bot---------------------------------------------
 

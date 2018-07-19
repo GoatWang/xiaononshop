@@ -26,6 +26,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from uuid import uuid4
 from urllib.parse import parse_qs, urlparse
+import requests
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -40,12 +41,22 @@ def line_login_callback(request):
     print("request.POST", request.POST)
     print("request.GET", request.GET)
     # return redirect(callback_viewfun)
+
+    post_data = {
+        "grant_type": 'authorization_code',
+        "code": request.GET['code'],
+        "redirect_uri": settings.LINE_CALLBACK_URL,
+        "client_id": settings.LINE_LOGIN_CHANNEL_ID,
+        "client_secret": settings.LINE_LOGIN_CHANNEL_SECRET,
+    }
+    res = requests.post('https://api.line.me/oauth2/v2.1/token', data=post_data, headers='Content-Type: application/x-www-form-urlencoded')
+    print("res.text", res.text)
     return HttpResponse("url: " + url + ", " + "query_string: " + query_string + ", " + "query_dict: " + str(query_dict))
 
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        return redirect("""https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=https://xiaononshop.com/order/line_login_callback/&state=" + state + "&scope=profile%20openid%20email""")
+        return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + settings.LINE_CALLBACK_URL + "&state=" + state + "&scope=profile%20openid%20email")
 
     else:
         if request.method == "GET":

@@ -18,7 +18,9 @@
     #priceTotalLabel font {
         color:red;
     }
-
+    #priceTotalLabel {
+        font-size:20px;
+    }
     #area_distribution_dropdown_div {
         margin-bottom: 15px;
     }
@@ -97,9 +99,22 @@
         </tbody>
     </table>
 </div>
+<p align="right" id="priceTotalLabel">總計<font>0</font>元<p/>
 
-<h4 id="priceTotalLabel">總計<font>0</font>元<h4/>
 
+<div class="row">
+    <div class="input-group mb-3">
+        <div class="input-group-prepend">
+            <div class="input-group-text">
+            <input type="checkbox" aria-label="Checkbox for following text input">
+            </div>
+        </div>
+        <input type="text" class="form-control" aria-label="Text input with checkbox" disabled="disabled" value="同意小農要求您的email以便訂單確認。Agree xiaonon to request your email to confirm the order.">
+    </div>
+    <div class="input-group mb-3">
+        <button type="button" class="btn btn-outline-secondary">提交訂單</button>
+    </div>
+</div>
 {% endblock %}
 {% block scripts %}
 <script>

@@ -1,8 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from xiaonon import settings
+from django.contrib.auth.models import User
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 from order.utl import get_order_detail, parse_url_query_string
 
@@ -18,64 +19,82 @@ from linebot.models import (
 )
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
-from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_confirmation_messages, get_web_create_order_messages
+from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_confirmation_messages#, get_web_create_order_messages
+
 import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
-
+from uuid import uuid4
+from urllib.parse import parse_qs, urlparse
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
-def order_create(request, area_id=1, distribution_place_id=1, line_id=0):
-    areas = Area.objects.all()
-    output_adps = [] # area and distributions
-    selected_adp_option_text = ""
-    for a in areas:
-        distribution_places = DistributionPlace.objects.filter(area=a)
-        for dp in distribution_places:
-            adp_dict = {
-                "option_text":a.area + "--" + dp.distribution_place,
-                "area_id":a.id,
-                "distribution_place_id":dp.id,
-            }
-            if area_id==a.id and distribution_place_id==dp.id:
-                adp_dict['selected'] = True  
-                selected_adp_option_text = a.area + "--" + dp.distribution_place
-            else:
-                adp_dict['selected'] = False
-            output_adps.append(adp_dict)
+def line_login_callback(request, callback_viewfun):
+    url = request.path
+    query_string = urlparse(url).query
+    query_dict = parse_qs(urlparse(url).query)
+    print(url)
+    print(query_string)
+    print(query_dict)
+    print(callback_viewfun)
+    # return redirect(callback_viewfun)
+    return HttpResponse("url" + url + ", " + "query_string" + query_string + ", " + "query_dict" + query_dict + ", " + "callback_viewfun" + callback_viewfun)
 
-    available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
-    available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
-    # {'bento__id': 26, 
-    # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
-    aws_url = "https://s3.amazonaws.com/xiaonon/"
-    df_available_bentos = pd.DataFrame(available_bentos)
-    df_available_bentos['id'] = df_available_bentos['bento__id']
-    df_available_bentos['name'] = df_available_bentos['bento__name']
-    df_available_bentos['date'] = df_available_bentos['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
-    df_available_bentos['bento_type'] = df_available_bentos['bento__bento_type__bento_type']
-    df_available_bentos['cuisine'] = df_available_bentos['bento__cuisine']
-    df_available_bentos['photo'] = df_available_bentos['bento__photo'].apply(lambda x:aws_url + x)
-    df_available_bentos['price'] = df_available_bentos['bento__price']
-    df_available_bentos['remain'] = df_available_bentos['remain'].astype(str)
-    df_available_bentos['select_range'] = df_available_bentos['remain'].apply(lambda x:list(range(0, 11)) if int(x)>=10 else list(range(0, int(x)+1)))
+def order_create(request, area_id=1, distribution_place_id=1):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        return redirect("""https://access.line.me/oauth2/v2.1/authorize?response_type=200&client_id=1594806265&redirect_uri=https://xiaononshop.com/order/line_login_callback/order_create&state=" + state + "&scope=profile%20openid%20email""")
 
-    df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain", "select_range"]]
-    df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
-    available_bentos = df_available_bentos.T.to_dict().values()
-
-    if request.method == "GET":
-        context = {
-            'title':'多筆訂購',
-            'apds':output_adps,
-            'selected_adp_option_text':selected_adp_option_text,
-            'available_bentos':available_bentos,
-        }
-        return render(request, 'order/order_create.html', context)
     else:
-        pass
+        if request.method == "GET":
+            areas = Area.objects.all()
+            output_adps = [] # area and distributions
+            selected_adp_option_text = ""
+            for a in areas:
+                distribution_places = DistributionPlace.objects.filter(area=a)
+                for dp in distribution_places:
+                    adp_dict = {
+                        "option_text":a.area + "--" + dp.distribution_place,
+                        "area_id":a.id,
+                        "distribution_place_id":dp.id,
+                    }
+                    if area_id==a.id and distribution_place_id==dp.id:
+                        adp_dict['selected'] = True  
+                        selected_adp_option_text = a.area + "--" + dp.distribution_place
+                    else:
+                        adp_dict['selected'] = False
+                    output_adps.append(adp_dict)
+
+            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+            available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
+            # {'bento__id': 26, 
+            # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
+            aws_url = "https://s3.amazonaws.com/xiaonon/"
+            df_available_bentos = pd.DataFrame(available_bentos)
+            df_available_bentos['id'] = df_available_bentos['bento__id']
+            df_available_bentos['name'] = df_available_bentos['bento__name']
+            df_available_bentos['date'] = df_available_bentos['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+            df_available_bentos['bento_type'] = df_available_bentos['bento__bento_type__bento_type']
+            df_available_bentos['cuisine'] = df_available_bentos['bento__cuisine']
+            df_available_bentos['photo'] = df_available_bentos['bento__photo'].apply(lambda x:aws_url + x)
+            df_available_bentos['price'] = df_available_bentos['bento__price']
+            df_available_bentos['remain'] = df_available_bentos['remain'].astype(str)
+            df_available_bentos['select_range'] = df_available_bentos['remain'].apply(lambda x:list(range(0, 11)) if int(x)>=10 else list(range(0, int(x)+1)))
+
+            df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain", "select_range"]]
+            df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
+            available_bentos = df_available_bentos.T.to_dict().values()
+
+            context = {
+                'title':'多筆訂購',
+                'apds':output_adps,
+                'selected_adp_option_text':selected_adp_option_text,
+                'available_bentos':available_bentos,
+            }
+            return render(request, 'order/order_create.html', context)
+        if request.method == "POST":
+            pass
 
 
 # ------------------------following are line bot---------------------------------------------
@@ -84,12 +103,22 @@ def _handle_follow_event(event):
     line_id = event.source.user_id
     profile = line_bot_api.get_profile(line_id)
     
-    LineProfile.objects.create(
-        line_id = line_id,
-        line_name = profile.display_name,
-        line_picture_url = profile.picture_url,
-        line_status_message=profile.status_message,
-    )
+    profile_exists = User.objects.filter(username=line_id).count()
+    if profile_exists == 0:
+        user = User(username = line_id)
+        user.save()
+        lineprofile = LineProfile(
+            line_id = line_id,
+            line_name = profile.display_name,
+            line_picture_url = profile.picture_url,
+            line_status_message=profile.status_message,
+            user = user
+        )
+        lineprofile.save()
+    else:
+        user = User.objects.get(username = line_id)
+        lineprofile = LineProfile.objects.get(user = user)
+        lineprofile.unfollow = False
 
 def _handle_unfollow_event(event):
     line_id = event.source.user_id
@@ -107,11 +136,11 @@ def _handle_text_msg(event):
 
     if text == "動作: 開始訂購":
         messages = get_order_date_reply_messages(event)
-    elif text == "動作: 多筆訂購":
-        pwd = ''.join(np.random.randint(0, 9, 6).astype(str))
-        line_profile.state = "web_pwd:" + pwd
-        line_profile.save()
-        messages = get_web_create_order_messages(event, pwd, line_id)
+    # elif text == "動作: 多筆訂購":
+    #     pwd = ''.join(np.random.randint(0, 9, 6).astype(str))
+    #     line_profile.state = "web_pwd:" + pwd
+    #     line_profile.save()
+    #     messages = get_web_create_order_messages(event, pwd, line_id)
 
     elif line_profile_state == "phone":
         line_profile.phone = str(text)

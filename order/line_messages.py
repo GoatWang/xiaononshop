@@ -18,23 +18,23 @@ parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 from datetime import datetime
 from order.utl import weekday_zh_mapping, college_simplify_mapping, date_to_zh_string, date_to_url_string, url_string_to_date, get_order_detail
 
-def get_web_create_order_messages(event, pwd, line_id):
-        message = TemplateSendMessage(
-            alt_text='網頁訂購',
-            template=ButtonsTemplate(
-                # thumbnail_image_url='https://example.com/image.jpg',
-                title='請記住您的訂購密碼',
-                text='密碼: '+ pwd,
-                actions=[
-                    URITemplateAction(
-                        label='前往訂購',
-                        uri=settings.DOMAIN + 'order/order_create/' + line_id + '/'
-                    )
-                ]
-            )
-        )
-        messages = [message]
-        return messages
+# def get_web_create_order_messages(event, pwd, line_id):
+#         message = TemplateSendMessage(
+#             alt_text='網頁訂購',
+#             template=ButtonsTemplate(
+#                 # thumbnail_image_url='https://example.com/image.jpg',
+#                 title='請記住您的訂購密碼',
+#                 text='密碼: '+ pwd,
+#                 actions=[
+#                     URITemplateAction(
+#                         label='前往訂購',
+#                         uri=settings.DOMAIN + 'order/order_create/' + line_id + '/'
+#                     )
+#                 ]
+#             )
+#         )
+#         messages = [message]
+#         return messages
 
 
 

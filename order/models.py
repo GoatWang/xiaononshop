@@ -1,8 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
 import os
 from uuid import uuid4
+
 
 class Job(models.Model):
     job = models.CharField(max_length=10)
@@ -23,6 +27,7 @@ class LineProfile(models.Model):
     create_time = models.DateTimeField(auto_now=True, verbose_name="創建時間")
     def __str__(self):
         return str(self.line_name)
+
 
 class BentoType(models.Model):
     bento_type = models.CharField(max_length=10)

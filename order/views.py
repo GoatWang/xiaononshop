@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from xiaonon import settings
 from django.contrib.auth.models import User
+from django.contrib import auth
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 from order.utl import get_order_detail, parse_url_query_string
 
@@ -35,14 +36,8 @@ def index(request):
 
 def line_login_callback(request):
     url = request.path
-    print("url", url)
     query_string = urlparse(url).query
-    print("query_string", query_string)
     query_dict = parse_qs(urlparse(url).query)
-    print("query_dict", query_dict)
-    print("request.POST", request.POST)
-    print("request.GET", request.GET)
-    # return redirect(callback_viewfun)
 
     post_data = {
         "grant_type": 'authorization_code',
@@ -55,23 +50,18 @@ def line_login_callback(request):
         "Content-Type":"application/x-www-form-urlencoded",
     }
     res = requests.post('https://api.line.me/oauth2/v2.1/token', data=post_data, headers=headers)
-    print("res.text", res.text)
-
-
 
     line_login_profile_b64 = eval(res.text)['id_token']
     line_login_profile_b64_decoded = urlsafe_b64decode(line_login_profile_b64[:-38] + '============')
     line_login_profile = eval(re.findall(b'\{.+?\}', line_login_profile_b64_decoded)[1].decode())
-    print("line_login_profile", line_login_profile)
-    print("email", line_login_profile.get('email'))
-    print("name", line_login_profile.get('name'))
-    print("line_id", line_login_profile.get('sub'))
-    print("picture", line_login_profile.get('picture'))
+    line_id = line_login_profile.get('sub')
 
-    # httptext = "email: " + line_login_profile.get('email') +"name: " + line_login_profile.get('name') +"line_id: " + line_login_profile.get('sub') +"picture: " + line_login_profile.get('picture')
-    httptext = "line_id: " + line_login_profile.get('sub')
-    return HttpResponse(httptext)
+    lineprofile = LineProfile.objects.get(line_id=line_id)
+    user = lineprofile.user
+    auth.login(request, user)
+    return redirect('order_create')
 
+@csrf_exempt
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:
         state =  uuid4().hex
@@ -126,6 +116,10 @@ def order_create(request, area_id=1, distribution_place_id=1):
             }
             return render(request, 'order/order_create.html', context)
         if request.method == "POST":
+            postdata = request.POST
+            user = request.user
+            print(postdata)
+            print(user)
             pass
 
 

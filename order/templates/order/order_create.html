@@ -112,7 +112,7 @@
         <input type="text" class="form-control" aria-label="Text input with checkbox" disabled="disabled" value="同意小農要求您的email以便訂單確認。Agree xiaonon to request your email to confirm the order.">
     </div>
     <div class="input-group mb-3">
-        <button type="button" class="btn btn-outline-secondary">提交訂單</button>
+        <button id="submitBtn" type="button" class="btn btn-outline-secondary">提交訂單</button>
     </div>
 </div>
 {% endblock %}
@@ -151,6 +151,22 @@
         })
         $("#priceTotalLabel font").text(sumOfSubtotals.toString())
     })
+
+    $("#submitBtn").click(function(){
+        $.ajax({
+            url: '/order/order_create/',
+            data: {
+              'username': "username",
+              'password': "password"
+            },
+            dataType: 'json',
+            success: function (data) {
+                console.log(data)
+                console.log("success")
+            }
+          });
+    })
+    
 </script>
 
 {% endblock %}

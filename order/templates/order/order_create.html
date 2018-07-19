@@ -152,7 +152,9 @@
         $("#priceTotalLabel font").text(sumOfSubtotals.toString())
     })
 
+
     $("#submitBtn").click(function(){
+        $('body').css('cursor','wait');
         $.ajax({
             type: 'POST',
             url: '/order/order_create/',
@@ -165,6 +167,7 @@
                 alert('訂購成功!')
                 console.log(data)
                 console.log("success")
+                $('body').css('cursor','auto');
             }
           });
     })

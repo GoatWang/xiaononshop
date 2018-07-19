@@ -56,8 +56,8 @@ def line_login_callback(request):
     }
     res = requests.post('https://api.line.me/oauth2/v2.1/token', data=post_data, headers=headers)
     print("res.text", res.text)
-
-    line_login_profile = eval(re.findall(b'\{.+?\}', urlsafe_b64decode(res.text + "="))[1].decode())
+    line_login_profile_b64 = eval(res.text)['id_token'] + "="
+    line_login_profile = eval(re.findall(b'\{.+?\}', urlsafe_b64decode(line_login_profile_b64))[1].decode())
     print("line_login_profile", line_login_profile)
     print("email", line_login_profile['email'])
     print("name", line_login_profile['name'])

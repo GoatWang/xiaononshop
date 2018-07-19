@@ -130,7 +130,10 @@ def order_create(request, area_id=1, distribution_place_id=1):
             user = request.user
             print(postdata)
             print(user)
-            return HttpResponse(str(postdata) + ", " + str(user))
+            return JsonResponse({
+                "postdata":str(postdata),
+                "user":str(user)
+            })
 
 # ------------------------following are line bot---------------------------------------------
 

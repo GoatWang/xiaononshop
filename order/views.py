@@ -61,14 +61,15 @@ def line_login_callback(request):
 
     line_login_profile_b64 = eval(res.text)['id_token']
     line_login_profile_b64_decoded = urlsafe_b64decode(line_login_profile_b64[:-38] + '============')
-    line_login_profile = eval(re.findall(b'\{.+?\}', line_login_profile_b64_decoded))[1].decode()
+    line_login_profile = eval(re.findall(b'\{.+?\}', line_login_profile_b64_decoded)[1].decode())
     print("line_login_profile", line_login_profile)
     print("email", line_login_profile.get('email'))
     print("name", line_login_profile.get('name'))
     print("line_id", line_login_profile.get('sub'))
     print("picture", line_login_profile.get('picture'))
 
-    httptext = "email: " + line_login_profile.get('email') +"name: " + line_login_profile.get('name') +"line_id: " + line_login_profile.get('sub') +"picture: " + line_login_profile.get('picture')
+    # httptext = "email: " + line_login_profile.get('email') +"name: " + line_login_profile.get('name') +"line_id: " + line_login_profile.get('sub') +"picture: " + line_login_profile.get('picture')
+    httptext = "line_id: " + line_login_profile.get('sub')
     return HttpResponse(httptext)
 
 def order_create(request, area_id=1, distribution_place_id=1):

@@ -183,8 +183,6 @@ LINE_LOGIN_CHANNEL_SECRET = pwddata['LINE_LOGIN_CHANNEL_SECRET']
 LINE_CALLBACK_URL = pwddata['LINE_CALLBACK_URL']
 
 
-
-
 DOMAIN = 'https://xiaononshop.com/'
 
 

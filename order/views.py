@@ -31,20 +31,20 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 def line_login_callback(request, callback_viewfun):
-    url = request.path
-    query_string = urlparse(url).query
-    query_dict = parse_qs(urlparse(url).query)
-    print(url)
-    print(query_string)
-    print(query_dict)
     print(callback_viewfun)
+    url = request.path
+    print(url)
+    query_string = urlparse(url).query
+    print(query_string)
+    query_dict = parse_qs(urlparse(url).query)
+    print(query_dict)
     # return redirect(callback_viewfun)
-    return HttpResponse("url" + url + ", " + "query_string" + query_string + ", " + "query_dict" + query_dict + ", " + "callback_viewfun" + callback_viewfun)
+    return HttpResponse("url: " + url + ", " + "query_string: " + query_string + ", " + "query_dict: " + str(query_dict) + ", " + "callback_viewfun: " + callback_viewfun)
 
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        return redirect("""https://access.line.me/oauth2/v2.1/authorize?response_type=200&client_id=1594806265&redirect_uri=https://xiaononshop.com/order/line_login_callback/order_create&state=" + state + "&scope=profile%20openid%20email""")
+        return redirect("""https://access.line.me/oauth2/v2.1/authorize?response_type=200&client_id=1594806265&redirect_uri=https://xiaononshop.com/order/line_login_callback/order_create/&state=" + state + "&scope=profile%20openid%20email""")
 
     else:
         if request.method == "GET":

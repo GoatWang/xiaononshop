@@ -32,13 +32,13 @@ def index(request):
 
 def line_login_callback(request):
     url = request.path
-    print(url)
+    print("url", url)
     query_string = urlparse(url).query
-    print(query_string)
+    print("query_string", query_string)
     query_dict = parse_qs(urlparse(url).query)
-    print(query_dict)
-    print(request.POST)
-    print(request.GET)
+    print("query_dict", query_dict)
+    print("request.POST", request.POST)
+    print("request.GET", request.GET)
     # return redirect(callback_viewfun)
     return HttpResponse("url: " + url + ", " + "query_string: " + query_string + ", " + "query_dict: " + str(query_dict))
 

@@ -7,7 +7,7 @@ from xiaonon import settings
 from django.contrib.auth.models import User
 from django.contrib import auth
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
-from order.utl import get_order_detail, parse_url_query_string
+from order.utl import get_order_detail, parse_url_query_string, create_order
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -126,26 +126,36 @@ def order_create(request, area_id=1, distribution_place_id=1):
             }
             return render(request, 'order/order_create.html', context)
         if request.method == "POST":
-            postdata = request.POST
+            order_data = request.POST['order_data']
             user = request.user
-            print("user", user)
             lineprofile = LineProfile.objects.get(user=user)
-            print("lineprofile", lineprofile)
+
             line_id = lineprofile.line_id
-            print("line_id", line_id)
-            print("line_id", line_id)
-            print("line_id", line_id)
-            print("line_id", line_id)
+
+            all_success = True
+            for od in order_data:
+                bento_id = od['bento_id']
+                order_number = od['order_number']
+                area_id = od['area_id']
+                distribution_place_id = od['distribution_place_id']
+                success = create_order(line_id, bento_id, order_number, area_id, distribution_place_id)
+                if not success: all_success=False
+            
+            if all_success: 
+                res_message = "已經訂購成功，以下是您的訂單資訊。" #TODO: 回饋訂單查詢URL
+                state = True
+            else: 
+                res_message = "部分訂單因數量不足，請從新訂購。" #TODO: 回饋失敗部分
+                state = False
 
             line_bot_api.push_message(
                 line_id,
-                TextSendMessage(text="以已經訂購成功，以下是您的訂單資訊。")
+                TextSendMessage(text=res_message)
             )
+            return JsonResponse({"state":state})
 
-            return JsonResponse({
-                "postdata":str(postdata),
-                "user":str(user)
-            })
+
+
 
 # ------------------------following are line bot---------------------------------------------
 
@@ -244,36 +254,23 @@ def _handle_postback_event(event):
         bento_id = postback_data['bento_id']
         order_number = postback_data['order_number']
 
-        target_line_profile = LineProfile.objects.get(line_id=line_id)
-        target_bento = Bento.objects.get(id=bento_id)
-        target_area = Area.objects.get(id=area_id)
-        target_distribution_place = DistributionPlace.objects.get(id=distribution_place_id)
+        success = create_order(line_id, bento_id, order_number, area_id, distribution_place_id)
+        if success:
+            order_detail = get_order_detail(date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
+            messages = [TextSendMessage(text="恭喜您訂購成功" + order_detail)]
 
-        Order.objects.create(
-            line_profile=target_line_profile,
-            bento=target_bento,
-            area=target_area,
-            distribution_place=target_distribution_place,
-            number=order_number
-        )
-
-        area_limitation = AreaLimitation.objects.get(bento=target_bento, area=target_area)
-        area_limitation.remain -= int(order_number)
-        area_limitation.save()
-
-        order_detail = get_order_detail(date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
-        messages = [TextSendMessage(text="恭喜您訂購成功" + order_detail)]
-
-        line_profile = LineProfile.objects.get(line_id=line_id)
-        if not line_profile.phone:
-            line_profile.state = 'phone'
-            line_profile.save()
-            messages.extend([TextSendMessage(text="請留下您的電話，以方便我們聯絡您取餐: \nex. 0912345678")])
+            line_profile = LineProfile.objects.get(line_id=line_id)
+            if not line_profile.phone:
+                line_profile.state = 'phone'
+                line_profile.save()
+                messages.extend([TextSendMessage(text="請留下您的電話，以方便我們聯絡您取餐: \nex. 0912345678")])
     
-        # print("date_string", date_string)
-        # print("area_id", area_id)
-        # print("distribution_place_id", distribution_place_id)
-        # print("bento_id", bento_id)
+            # print("date_string", date_string)
+            # print("area_id", area_id)
+            # print("distribution_place_id", distribution_place_id)
+            # print("bento_id", bento_id)
+        else:
+            messages = [TextSendMessage(text="抱歉，剩餘便當不足，請從新開始訂購。")]
 
     line_bot_api.reply_message(
         event.reply_token,

@@ -57,6 +57,8 @@
                 <h4 class="card-title bentoNameH4"><strong>{{ bento.name }}(剩餘{{ bento.remain }}個)</strong></h4>
                 <p class="card-text dateTypeP">{{ bento.date }} {{ bento.bento_type }}</p>
                 <p class="card-text">{{ bento.cuisine }}</p>
+                <p class="card-text idP" hidden>{{ bento.id }}</p>
+
             </div>
             <div class="card-footer">
                 <div class="form-group row">
@@ -155,21 +157,41 @@
 
     $("#submitBtn").click(function(){
         $('body').css('cursor','wait');
-        $.ajax({
-            type: 'POST',
-            url: '/order/order_create/',
-            data: {
-              'username': "username",
-              'password': "password"
-            },
-            dataType: 'json',
-            success: function (data) {
-                alert('訂購成功!')
-                console.log(data)
-                console.log("success")
-                $('body').css('cursor','auto');
+        
+        orderData = []
+        currentUrl = window.location.href 
+        area_id = currentUrl.split()[5]
+        distribution_place_id = currentUrl.split()[6]
+        $(".card").each(function(){
+            id = $(this).find(".idP").text().replace("元", "")
+            number = $(this).find(".numberInput").val()
+            if(number != "" && number != '0'){
+                orderData.push({
+                    "bento_id":id, 
+                    "order_number":number,
+                    "area_id":area_id,
+                    "distribution_place_id":distribution_place_id
+                })
             }
-          });
+        })
+        
+        if(orderData != []){
+            $.ajax({
+                type: 'POST',
+                url: '/order/order_create/',
+                data: {"orderData":orderData},
+                dataType: 'json',
+                success: function (data) {
+                    alert('訂購成功!')
+                    console.log(data)
+                    console.log("success")
+                    $('body').css('cursor','auto');
+                }
+              });
+        }
+        else{
+            alert("請選擇您要的便當。")
+        }
     })
 
 </script>

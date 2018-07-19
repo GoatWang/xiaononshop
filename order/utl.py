@@ -52,3 +52,26 @@ def get_order_detail(date_string, area_id, distribution_place_id, bento_id, orde
                 "取餐地點: " + area_string + distrbution_place_string
 
     return order_detail
+
+def create_order(line_id, bento_id, order_number, area_id, distribution_place_id):
+    target_line_profile = LineProfile.objects.get(line_id=line_id)
+    target_bento = Bento.objects.get(id=bento_id)
+    target_area = Area.objects.get(id=area_id)
+    target_distribution_place = DistributionPlace.objects.get(id=distribution_place_id)
+
+    area_limitation = AreaLimitation.objects.get(bento=target_bento, area=target_area)
+    if area_limitation.remain >= int(order_number):
+        Order.objects.create(
+            line_profile=target_line_profile,
+            bento=target_bento,
+            area=target_area,
+            distribution_place=target_distribution_place,
+            number=order_number
+        )
+
+        area_limitation.remain -= int(order_number)
+        area_limitation.save()
+        return True
+    else:
+        return False
+

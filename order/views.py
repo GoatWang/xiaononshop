@@ -59,18 +59,19 @@ def line_login_callback(request):
     line_login_profile_b64 = eval(res.text)['id_token'] + "="
     line_login_profile = eval(re.findall(b'\{.+?\}', urlsafe_b64decode(line_login_profile_b64))[1].decode())
     print("line_login_profile", line_login_profile)
-    print("email", line_login_profile['email'])
-    print("name", line_login_profile['name'])
-    print("line_id", line_login_profile['sub'])
-    print("picture", line_login_profile['picture'])
+    print("email", line_login_profile.get('email'))
+    print("name", line_login_profile.get('name'))
+    print("line_id", line_login_profile.get('sub'))
+    print("picture", line_login_profile.get('picture'))
 
-    httptext = "email: " + line_login_profile['email'] +"name: " + line_login_profile['name'] +"line_id: " + line_login_profile['sub'] +"picture: " + line_login_profile['picture']
+    httptext = "email: " + line_login_profile.get('email') +"name: " + line_login_profile.get('name') +"line_id: " + line_login_profile.get('sub') +"picture: " + line_login_profile.get('picture')
     return HttpResponse(httptext)
 
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + settings.LINE_CALLBACK_URL + "&state=" + state + "&scope=profile%20openid%20email")
+        # return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + settings.LINE_CALLBACK_URL + "&state=" + state + "&scope=profile%20openid%20email")
+        return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + settings.LINE_CALLBACK_URL + "&state=" + state + "&scope=openid")
 
     else:
         if request.method == "GET":

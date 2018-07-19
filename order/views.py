@@ -49,7 +49,10 @@ def line_login_callback(request):
         "client_id": settings.LINE_LOGIN_CHANNEL_ID,
         "client_secret": settings.LINE_LOGIN_CHANNEL_SECRET,
     }
-    res = requests.post('https://api.line.me/oauth2/v2.1/token', data=post_data, headers='Content-Type: application/x-www-form-urlencoded')
+    headers = {
+        "Content-Type":"application/x-www-form-urlencoded",
+    }
+    res = requests.post('https://api.line.me/oauth2/v2.1/token', data=post_data, headers=headers)
     print("res.text", res.text)
     return HttpResponse("url: " + url + ", " + "query_string: " + query_string + ", " + "query_dict: " + str(query_dict))
 

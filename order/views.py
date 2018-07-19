@@ -137,10 +137,10 @@ def order_create(request, area_id=1, distribution_place_id=1):
             print("line_id", line_id)
             print("line_id", line_id)
 
-            # line_bot_api.push_message(
-            #     line_id,
-            #     TextSendMessage(text="以已經訂購成功，以下是您的訂單資訊。")
-            # )
+            line_bot_api.push_message(
+                line_id,
+                TextSendMessage(text="以已經訂購成功，以下是您的訂單資訊。")
+            )
 
             return JsonResponse({
                 "postdata":str(postdata),

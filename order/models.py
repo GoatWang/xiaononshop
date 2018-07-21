@@ -78,6 +78,7 @@ class Order(models.Model):
     number = models.IntegerField(verbose_name="數量")
     price = models.IntegerField(default=120, verbose_name="價格")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="創建時間")
+    delete_time = models.DateTimeField(null=True, default=None)
     def __str__(self):
         return str(self.line_profile) + "_" + str(self.bento) + "_" + str(self.number)
 

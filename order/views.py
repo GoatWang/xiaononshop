@@ -43,10 +43,8 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
     # return redirect_self(request, "order/order_create/")
 
-def line_login_callback(request):
+def line_login_callback(request, app_name, view_name):
     url = request.path
-    query_string = urlparse(url).query
-    query_dict = parse_qs(urlparse(url).query)
 
     post_data = {
         "grant_type": 'authorization_code',
@@ -65,18 +63,19 @@ def line_login_callback(request):
     line_login_profile = eval(re.findall(b'\{.+?\}', line_login_profile_b64_decoded)[1].decode())
     line_id = line_login_profile.get('sub')
 
-    lineprofile = LineProfile.objects.get(line_id=line_id)
-    user = lineprofile.user
+    line_profile = LineProfile.objects.get(line_id=line_id)
+    user = line_profile.user
     auth.login(request, user)
-    return redirect_self(request, "order/order_create/")
+    return redirect_self(request, app_name + "/" + view_name + "/")
 
 
 @csrf_exempt
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:
         state =  uuid4().hex
+        callback = settings.LINE_CALLBACK_URL + 'order/order_create/'
         # return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + settings.LINE_CALLBACK_URL + "&state=" + state + "&scope=profile%20openid%20email")
-        return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + settings.LINE_CALLBACK_URL + "&state=" + state + "&scope=openid")
+        return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid")
 
     else:
         if request.method == "GET":
@@ -129,16 +128,16 @@ def order_create(request, area_id=1, distribution_place_id=1):
             post_data = request.POST
             order_data = post_data['orderData']
             user = request.user
-            lineprofile = LineProfile.objects.get(user=user)
-            line_id = lineprofile.line_id
+            line_profile = LineProfile.objects.get(user=user)
+            line_id = line_profile.line_id
 
             all_success = True
             for od in eval(order_data):
-                print("od", od)
                 bento_id = int(od['bento_id'])
                 order_number = int(od['order_number'])
                 area_id = int(od['area_id'])
                 distribution_place_id = int(od['distribution_place_id'])
+                #TODO: add price column
                 success = create_order(line_id, bento_id, order_number, area_id, distribution_place_id)
                 if not success: all_success=False
             
@@ -155,6 +154,33 @@ def order_create(request, area_id=1, distribution_place_id=1):
             # return JsonResponse({"state":True})
 
 
+def order_list(request, line_id):
+    line_profile = LineProfile.objects.get(line_id=line_id)
+    current_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
+    df_current_orders = pd.DataFrame(current_orders)
+    df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
+    df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+    df_current_orders['name'] = df_current_orders['bento__name']
+    df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
+    df_current_orders['number'] = df_current_orders['number']
+    df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
+    df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
+
+    history_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__lt=datetime.now()).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date').reverse()[:10])
+    df_history_orders = pd.DataFrame(history_orders)
+    df_history_orders['row_id'] = pd.Series(df_history_orders.index).apply(lambda x:x+1)
+    df_history_orders['date'] = df_history_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+    df_history_orders['name'] = df_history_orders['bento__name']
+    df_history_orders['type'] = df_history_orders['bento__bento_type__bento_type']
+    df_history_orders['number'] = df_history_orders['number']
+    df_history_orders['cuisine'] = df_history_orders['bento__cuisine']
+    df_history_orders = df_history_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
+
+    context = {
+        "current_orders":df_current_orders.T.to_dict().values,
+        "history_orders":df_history_orders.T.to_dict().values
+    }
+    return render(request, 'order/order_list.html', context)
 
 
 # ------------------------following are line bot---------------------------------------------
@@ -167,18 +193,18 @@ def _handle_follow_event(event):
     if profile_exists == 0:
         user = User(username = line_id)
         user.save()
-        lineprofile = LineProfile(
+        line_profile = LineProfile(
             line_id = line_id,
             line_name = profile.display_name,
             line_picture_url = profile.picture_url,
             line_status_message=profile.status_message,
             user = user
         )
-        lineprofile.save()
+        line_profile.save()
     else:
         user = User.objects.get(username = line_id)
-        lineprofile = LineProfile.objects.get(user = user)
-        lineprofile.unfollow = False
+        line_profile = LineProfile.objects.get(user = user)
+        line_profile.unfollow = False
 
 def _handle_unfollow_event(event):
     line_id = event.source.user_id

@@ -76,6 +76,7 @@ class Order(models.Model):
     area = models.ForeignKey("Area", on_delete=models.CASCADE, verbose_name="地區")
     distribution_place = models.ForeignKey("DistributionPlace", on_delete=models.CASCADE, verbose_name="發放地點")
     number = models.IntegerField(verbose_name="數量")
+    price = models.IntegerField(default=120, verbose_name="價格")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="創建時間")
     def __str__(self):
         return str(self.line_profile) + "_" + str(self.bento) + "_" + str(self.number)

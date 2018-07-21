@@ -39,8 +39,8 @@ from order.utl import weekday_zh_mapping, college_simplify_mapping, date_to_zh_s
 
 
 def get_order_date_reply_messages(event):
-    maximum_futere_days_for_ordering = 14
-    available_dates = sorted(list(set(Bento.objects.filter(date__gt=datetime.now().date(), ready=True).values_list('date', flat=True))))[:maximum_futere_days_for_ordering]
+    maximum_future_days_for_ordering = 14
+    available_dates = sorted(list(set(Bento.objects.filter(date__gt=datetime.now().date(), ready=True).values_list('date', flat=True))))[:maximum_future_days_for_ordering]
     available_dates_len = len(available_dates)
     
     if available_dates_len <= 0:

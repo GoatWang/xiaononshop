@@ -1,0 +1,53 @@
+{% extends "order/layout.html" %}
+{% load staticfiles %}
+
+
+{% block scripts_top %}
+{% endblock %}
+
+
+{% block styles %}
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+<h4>近期訂單</h4>
+<div id="currentTableDiv" class="row">
+    <table class="table" id="currentTable">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col" hidden='hidden'>RowId</th>
+                <th scope="col">日期</th>
+                <th scope="col">飯盒</th>
+                <th scope="col">類型</th>
+                <th scope="col">價格</th>
+                <th scope="col">個數</th>
+                <th scope="col">菜色</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for co in current_orders %}
+            <tr>
+                <th scope="row">{{ co.row_id }}</th>
+                <td class="idTd" hidden='hidden'>{{ co.id }}</td>
+                <td calss="dateTd">{{ co.date }}</td>
+                <td>{{ co.name }}</td>
+                <td>{{ co.type }}</td>
+                <td>{{ co.price }}</td>
+                <td>{{ co.number }}</td>
+                <td>{{ co.cuisine }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+</script>
+{% endblock %}

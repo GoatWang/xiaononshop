@@ -131,7 +131,8 @@
             number = $(this).find(".numberInput").val()
             price = $(this).find(".priceLabel").text().replace("元", "")
             subtotal = (Number(number)*Number(price)).toString()
-
+            
+            //TODO: add discount columns
             if(number != "" && number != '0'){
                 rowCounts += 1
                 tr = $("<tr>")
@@ -163,7 +164,8 @@
         area_id = !isNaN(currentUrl.split()[5]) ? currentUrl.split()[5]:1
         distribution_place_id = !isNaN(currentUrl.split()[6]) ? currentUrl.split()[6]:1
         $(".card").each(function(){
-            id = $(this).find(".idP").text().replace("元", "")
+            //TODO: record price column
+            id = $(this).find(".idP").text()
             number = $(this).find(".numberInput").val()
             if(number != "" && number != '0'){
                 orderData.push({

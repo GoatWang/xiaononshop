@@ -40,7 +40,7 @@
                 <td>{{ co.price }}</td>
                 <td>{{ co.number }}</td>
                 <!-- <td>{{ co.cuisine }}</td> -->
-                <td><a href="{% url 'order:order_delete' order_id=co.id %}" type="button" class="btn btn-danger" value="取消訂單"/></td>
+                <td><a href="{% url 'order:order_delete' order_id=co.id %}" class="btn btn-danger">取消訂單</a></td>
             </tr>
             {% endfor %}
         </tbody>

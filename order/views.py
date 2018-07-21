@@ -192,7 +192,7 @@ def order_list(request):
         }
         return render(request, 'order/order_list.html', context)
 
-def delete_order(request, order_id):
+def order_delete(request, order_id):
     order = Order.object.get(id=order_id)
     order.delete_time = datetime.now()
     order.save()

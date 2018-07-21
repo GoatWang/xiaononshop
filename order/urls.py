@@ -10,6 +10,7 @@ urlpatterns = [
     path('order_create/<int:area_id>/<int:distribution_place_id>/', views.order_create, name='order_create'),
 
     path('order_list/', views.order_list, name='order_list'),
+    path('delete_order/<int:order_id>/', views.delete_order, name='delete_order'),
 
     path('line_login_callback/<str:app_name>/<str:view_name>', views.line_login_callback, name='line_login_callback'),
 

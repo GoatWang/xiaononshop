@@ -26,6 +26,7 @@
                 <th scope="col">價格</th>
                 <th scope="col">個數</th>
                 <!-- <th scope="col">菜色</th> -->
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -39,6 +40,7 @@
                 <td>{{ co.price }}</td>
                 <td>{{ co.number }}</td>
                 <!-- <td>{{ co.cuisine }}</td> -->
+                <td><a href="{% url 'order:order_delete' order_id=co.id %}" type="button" class="btn btn-danger" value="取消訂單"/></td>
             </tr>
             {% endfor %}
         </tbody>

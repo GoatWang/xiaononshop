@@ -41,7 +41,6 @@ def redirect_self(request, to):
 def get_line_login_api_url(state, callback):
     return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
 
-
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -193,6 +192,15 @@ def order_list(request):
         }
         return render(request, 'order/order_list.html', context)
 
+def delete_order(request, order_id):
+    order = Order.object.get(id=order_id)
+    order.delete_time = datetime.now()
+    order.save()
+    area_limitation = AreaLimitation.objects.get(bento=order.bento, area=order.area)
+    area_limitation.remain += order.number
+    area_limitation.save()
+    # return JsonResponse(data={"success":True})
+    return redirect_self(request,  "order/order_list/")
 
 # ------------------------following are line bot---------------------------------------------
 

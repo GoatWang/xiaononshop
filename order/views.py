@@ -166,7 +166,7 @@ def order_list(request):
         line_profile = LineProfile.objects.get(user=user)
         line_id = line_profile.line_id
         line_profile = LineProfile.objects.get(line_id=line_id)
-        current_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
+        current_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__gt=datetime.now()-timedelta(1), bento__delete_date=None).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
         df_current_orders = pd.DataFrame(current_orders)
         df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
         df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))

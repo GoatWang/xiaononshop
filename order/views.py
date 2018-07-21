@@ -38,6 +38,10 @@ def redirect_self(request, to):
     else:
         return redirect("https://" + domain + "/" + to)
 
+def get_line_login_api_url(state, callback):
+    return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
+
+
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
@@ -74,8 +78,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:
         state =  uuid4().hex
         callback = settings.LINE_CALLBACK_URL + 'order/order_create/'
-        # return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + settings.LINE_CALLBACK_URL + "&state=" + state + "&scope=profile%20openid%20email")
-        return redirect("https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid")
+        return redirect(get_line_login_api_url(state, callback))
 
     else:
         if request.method == "GET":
@@ -153,34 +156,42 @@ def order_create(request, area_id=1, distribution_place_id=1):
             return JsonResponse({"success":all_success, 'message':res_message})
             # return JsonResponse({"state":True})
 
+@csrf_exempt
+def order_list(request):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        callback = settings.LINE_CALLBACK_URL + 'order/order_list/'
+        return redirect(get_line_login_api_url(state, callback))
+    else:
+        user = request.user
+        line_profile = LineProfile.objects.get(user=user)
+        line_id = line_profile.line_id
+        line_profile = LineProfile.objects.get(line_id=line_id)
+        current_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
+        df_current_orders = pd.DataFrame(current_orders)
+        df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
+        df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+        df_current_orders['name'] = df_current_orders['bento__name']
+        df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
+        df_current_orders['number'] = df_current_orders['number']
+        df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
+        df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
 
-def order_list(request, line_id):
-    line_profile = LineProfile.objects.get(line_id=line_id)
-    current_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
-    df_current_orders = pd.DataFrame(current_orders)
-    df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
-    df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
-    df_current_orders['name'] = df_current_orders['bento__name']
-    df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
-    df_current_orders['number'] = df_current_orders['number']
-    df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
-    df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
+        history_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__lt=datetime.now()).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date').reverse()[:10])
+        df_history_orders = pd.DataFrame(history_orders)
+        df_history_orders['row_id'] = pd.Series(df_history_orders.index).apply(lambda x:x+1)
+        df_history_orders['date'] = df_history_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+        df_history_orders['name'] = df_history_orders['bento__name']
+        df_history_orders['type'] = df_history_orders['bento__bento_type__bento_type']
+        df_history_orders['number'] = df_history_orders['number']
+        df_history_orders['cuisine'] = df_history_orders['bento__cuisine']
+        df_history_orders = df_history_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
 
-    history_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__lt=datetime.now()).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date').reverse()[:10])
-    df_history_orders = pd.DataFrame(history_orders)
-    df_history_orders['row_id'] = pd.Series(df_history_orders.index).apply(lambda x:x+1)
-    df_history_orders['date'] = df_history_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
-    df_history_orders['name'] = df_history_orders['bento__name']
-    df_history_orders['type'] = df_history_orders['bento__bento_type__bento_type']
-    df_history_orders['number'] = df_history_orders['number']
-    df_history_orders['cuisine'] = df_history_orders['bento__cuisine']
-    df_history_orders = df_history_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
-
-    context = {
-        "current_orders":df_current_orders.T.to_dict().values,
-        "history_orders":df_history_orders.T.to_dict().values
-    }
-    return render(request, 'order/order_list.html', context)
+        context = {
+            "current_orders":df_current_orders.T.to_dict().values,
+            "history_orders":df_history_orders.T.to_dict().values
+        }
+        return render(request, 'order/order_list.html', context)
 
 
 # ------------------------following are line bot---------------------------------------------

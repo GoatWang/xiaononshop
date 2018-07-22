@@ -14,6 +14,7 @@ class Job(models.Model):
         return str(self.job)
 
 class LineProfile(models.Model):
+    ## 增加未領取次數記錄
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     line_id = models.CharField(max_length=50, primary_key=True, verbose_name="LineID")
     line_name = models.CharField(max_length=100, verbose_name="Line名稱")

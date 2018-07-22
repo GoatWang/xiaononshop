@@ -1,0 +1,105 @@
+{% extends "order/layout.html" %}
+{% load staticfiles %}
+
+
+{% block scripts_top %}
+{% endblock %}
+
+
+{% block styles %}
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+<h4>管理員清單</h4>
+<div class="row">
+    <table>
+        <thead>
+            <tr>
+                <th hidden="hidden">line_id</th>
+                <th>Line名稱</th>
+                <th>照片</th>
+                <th>手機</th>
+                <th>管理員資格</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prof in superuser_profile %}
+            <tr>
+                <td hidden="hidden">{{ prof.line_id }}</td>
+                <td>{{ prof.line_name }}</td>
+                <td><img src="{{ prof.line_picture_url }}"/></td>
+                <td>{{ prof.phone }}</td>
+                <td><a href="{% url 'order:backend_delete_superuser' line_id=prof.line_id %}">取消</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<h4>員工清單</h4>
+<div class="row">
+    <table>
+        <thead>
+            <tr>
+                <th hidden="hidden">line_id</th>
+                <th>Line名稱</th>
+                <th>照片</th>
+                <th>手機</th>
+                <th>員工資格</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prof in staff_profile %}
+            <tr>
+                <td hidden="hidden">{{ prof.line_id }}</td>
+                <td>{{ prof.line_name }}</td>
+                <td><img src="{{ prof.line_picture_url }}"/></td>
+                <td>{{ prof.phone }}</td>
+                <td><a href="{% url 'order:backend_delete_superuser' line_id=prof.line_id %}">取消</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<h4>好友清單</h4>
+<div class="row">
+        <table>
+            <thead>
+                <tr>
+                    <th hidden="hidden">line_id</th>
+                    <th>Line名稱</th>
+                    <th>照片</th>
+                    <th>手機</th>
+                    <th>新增資格</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prof in friend_profile %}
+                <tr>
+                    <td hidden="hidden">{{ prof.line_id }}</td>
+                    <td>{{ prof.line_name }}</td>
+                    <td><img src="{{ prof.line_picture_url }}"/></td>
+                    <td>{{ prof.phone }}</td>
+                    <td>
+                        <a href="{% url 'order:backend_add_superuser' line_id=prof.line_id %}">管理員</a>
+                        <a href="{% url 'order:backend_add_staff' line_id=prof.line_id %}">員工</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+</script>
+{% endblock %}

@@ -14,5 +14,13 @@ urlpatterns = [
 
     path('line_login_callback/<str:app_name>/<str:view_name>', views.line_login_callback, name='line_login_callback'),
 
+    # backend
+    path('backend_friend_list/', views.backend_friend_list, name='backend_friend_list'),
+    path('backend_add_staff/<str:line_id>/', views.backend_add_staff, name='backend_add_staff'),
+    path('backend_add_superuser/<str:line_id>/', views.backend_add_superuser, name='backend_add_superuser'),
+    path('backend_delete_staff/<str:line_id>/', views.backend_delete_staff, name='backend_delete_staff'),
+    path('backend_delete_superuser/<str:line_id>/', views.backend_delete_superuser, name='backend_delete_superuser'),
+
+    #bot
     path('callback/', views.callback, name='callback'),
 ]

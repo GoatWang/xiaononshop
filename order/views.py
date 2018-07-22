@@ -72,7 +72,7 @@ def line_login_callback(request, app_name, view_name):
     return redirect_self(request, app_name + "/" + view_name + "/")
 
 
-@csrf_exempt
+@csrf_exempt #TODO: add csrf protect
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:
         state =  uuid4().hex
@@ -144,7 +144,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 if not success: all_success=False
             
             if all_success: 
-                res_message = "已經訂購成功，以下是您的訂單資訊。" #TODO: 回饋訂單查詢URL
+                res_message = "謝謝你選擇照顧這片土地也照顧自己	，我們午餐時間見！\n若想查看或取消訂單，請直接點選'我的訂單'就可以囉！" #TODO: 回饋訂單查詢URL
             else: 
                 res_message = "部分訂單因數量不足，請從新訂購。" #TODO: 回饋失敗部分
 
@@ -155,7 +155,6 @@ def order_create(request, area_id=1, distribution_place_id=1):
             return JsonResponse({"success":all_success, 'message':res_message})
             # return JsonResponse({"state":True})
 
-@csrf_exempt
 def order_list(request):
     if not request.user.is_authenticated:
         state =  uuid4().hex
@@ -187,6 +186,7 @@ def order_list(request):
         df_history_orders = df_history_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
 
         context = {
+            "title":"查看訂單",
             "current_orders":df_current_orders.T.to_dict().values,
             "history_orders":df_history_orders.T.to_dict().values
         }
@@ -199,8 +199,166 @@ def order_delete(request, order_id):
     area_limitation = AreaLimitation.objects.get(bento=order.bento, area=order.area)
     area_limitation.remain += order.number
     area_limitation.save()
-    # return JsonResponse(data={"success":True})
-    return redirect_self(request,  "order/order_list/")
+
+    ## TODO: test message view
+    message_date = str(order.bento.date.month) + "/" + str(order.bento.date.day)
+    messsage = "您已成功取消「" + message_date + " " + message_date.name + "」訂單!"
+    context = {
+        "title":"取消訂單成功",
+        "messsage": messsage
+        }
+    return render(request, 'order/message.html', context)
+    # return redirect_self(request,  "order/order_list/")
+
+def backend_main_view(request):
+    context = {
+        "title":"後臺主頁"
+    }
+    return render(request, 'order/backend_main_view.html', context)
+
+def backend_friend_list(request):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
+        return redirect(get_line_login_api_url(state, callback))
+    else:
+        if not request.user.is_staff:
+            messsage = "is_superuser"
+            context = {
+                "title":"此頁面必須具有管理員身分方能查閱，",
+                "messsage": messsage
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            superuser_profile = LineProfile.objects.filter(user__is_superuser=True).values_list('line_id', 'line_name', 'line_picture_url', 'phone', named=True)
+            df_superuser_profile = pd.DataFrame(list(superuser_profile))
+            staff_profile = LineProfile.objects.filter(user__is_staff=True, user__is_superuser=False).values_list('line_id', 'line_name', 'line_picture_url', 'phone', named=True)
+            df_staff_profile = pd.DataFrame(list(staff_profile))
+            friend_profile = LineProfile.objects.filter(user__is_staff=False).values_list('line_id', 'line_name', 'line_picture_url', 'phone', named=True).order_by('create_time').reverse()[:10]
+            df_friend_profile = pd.DataFrame(list(friend_profile))
+
+            context = {
+                "title":"好友清單",
+                "superuser_profile":list(df_superuser_profile.T.to_dict().values()),
+                "staff_profile":list(df_staff_profile.T.to_dict().values()),
+                "friend_profile":list(df_friend_profile.T.to_dict().values())  
+            }
+            return render(request, 'order/backend_friend_list.html', context)
+
+def backend_add_staff(request, line_id):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
+        return redirect(get_line_login_api_url(state, callback))
+    else:
+        if not request.user.is_superuser:
+            messsage = "此頁面必須具有管理員身分方能查閱，"
+            context = {
+                "title":"您沒有查閱權限",
+                "messsage": messsage
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            user = LineProfile.objects.get(line_id=line_id).user
+            user.is_staff = True
+            user.save()
+            return redirect_self(request, 'order/backend_friend_list/')
+
+def backend_add_superuser(request, line_id):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
+        return redirect(get_line_login_api_url(state, callback))
+    else:
+        if not request.user.is_superuser:
+            messsage = "此頁面必須具有管理員身分方能查閱。"
+            context = {
+                "title":"您沒有查閱權限",
+                "messsage": messsage
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            user = LineProfile.objects.get(line_id=line_id).user
+            user.is_staff = True
+            user.is_superuser = True
+            user.save()
+            return redirect_self(request, 'order/backend_friend_list/')
+
+def backend_delete_staff(request, line_id):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
+        return redirect(get_line_login_api_url(state, callback))
+    else:
+        if not request.user.is_superuser:
+            messsage = "此頁面必須具有管理員身分方能查閱，"
+            context = {
+                "title":"您沒有查閱權限",
+                "messsage": messsage
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            user = LineProfile.objects.get(line_id=line_id).user
+            user.is_staff = False
+            user.save()
+            return redirect_self(request, 'order/backend_friend_list/')
+
+def backend_delete_superuser(request, line_id):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
+        return redirect(get_line_login_api_url(state, callback))
+    else:
+        if not request.user.is_superuser:
+            messsage = "此頁面必須具有管理員身分方能查閱。"
+            context = {
+                "title":"您沒有查閱權限",
+                "messsage": messsage
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            user = LineProfile.objects.get(line_id=line_id).user
+            user.is_superuser = False
+            user.save()
+            return redirect_self(request, 'order/backend_friend_list/')
+
+def daily_output_order(request, area_id):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        callback = settings.LINE_CALLBACK_URL + 'order/daily_output_order/'
+        return redirect(get_line_login_api_url(state, callback))
+    else:
+        if not request.user.is_staff:
+            messsage = "此頁面必須具有管理員身分方能查閱，"
+            context = {
+                "title":"您沒有查閱權限",
+                "messsage": messsage
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            order_list = Order.objects.filter(bento__date=datetime.now(), area=area_id).values_list('line_profile__line_name', 'line_profile__phone', 'bento__name', 'area__area', 'distribution_place__distribution_place', 'number', 'price', named=True).order_by("line_profile__line_name", "area__area", "distribution_place__distribution_place", "bento__name")
+            df_order_list = pd.DataFrame(list(order_list))
+            df_order_list['line_name'] = df_order_list['line_profile__line_name']
+            df_order_list['phone'] = df_order_list['line_profile__phone']
+            df_order_list['area'] = df_order_list['area__area']
+            df_order_list['distribution_place'] = df_order_list['distribution_place__distribution_place']
+            df_order_list['bento_name'] = df_order_list['bento__name']
+            df_order_list['number'] = df_order_list['number']
+            df_order_list['price'] = df_order_list['price']
+            df_order_list = df_order_list[['line_name', 'phone', 'area', 'distribution_place', 'bento_name', 'number', 'price']]
+
+            df_order_list_group = df_order_list.groupby(['area', 'distribution_place', 'bento_name']).count().reset_index()
+            df_order_list_group = df_order_list_group[['area', 'distribution_place', 'bento_name', 'number']]
+
+            area = Area.objects.get(id=area_id).area
+            context ={
+                "title": area + "當日訂單",
+                "order_list":list(df_order_list.T.to_dict().values()),
+                "order_agg":list(df_order_list_group.T.to_dict().values())
+            }
+        return render(request, 'order/daily_output_order.html', context)
+
+
 
 # ------------------------following are line bot---------------------------------------------
 

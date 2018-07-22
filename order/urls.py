@@ -12,7 +12,7 @@ urlpatterns = [
     path('order_list/', views.order_list, name='order_list'),
     path('order_delete/<int:order_id>/', views.order_delete, name='order_delete'),
 
-    path('line_login_callback/<str:app_name>/<str:view_name>', views.line_login_callback, name='line_login_callback'),
+    path('line_login_callback/<str:app_name>/<str:view_name>/', views.line_login_callback, name='line_login_callback'),
 
     # backend
     path('backend_friend_list/', views.backend_friend_list, name='backend_friend_list'),

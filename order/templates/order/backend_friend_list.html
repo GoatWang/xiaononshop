@@ -15,7 +15,7 @@
 <h2>{{ title }}</h2>
 <h4>管理員清單</h4>
 <div class="row">
-    <table>
+    <table  class="table">
         <thead>
             <tr>
                 <th hidden="hidden">line_id</th>
@@ -30,9 +30,9 @@
             <tr>
                 <td hidden="hidden">{{ prof.line_id }}</td>
                 <td>{{ prof.line_name }}</td>
-                <td><img src="{{ prof.line_picture_url }}"/></td>
+                <td><img class="img-thumbnail" src="{{ prof.line_picture_url }}"/></td>
                 <td>{{ prof.phone }}</td>
-                <td><a href="{% url 'order:backend_delete_superuser' line_id=prof.line_id %}">取消</a></td>
+                <td><a class="btn btn-danger" href="{% url 'order:backend_delete_superuser' line_id=prof.line_id %}">取消</a></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -42,7 +42,7 @@
 
 <h4>員工清單</h4>
 <div class="row">
-    <table>
+    <table class="table">
         <thead>
             <tr>
                 <th hidden="hidden">line_id</th>
@@ -57,9 +57,9 @@
             <tr>
                 <td hidden="hidden">{{ prof.line_id }}</td>
                 <td>{{ prof.line_name }}</td>
-                <td><img src="{{ prof.line_picture_url }}"/></td>
+                <td><img class="img-thumbnail" src="{{ prof.line_picture_url }}"/></td>
                 <td>{{ prof.phone }}</td>
-                <td><a href="{% url 'order:backend_delete_superuser' line_id=prof.line_id %}">取消</a></td>
+                <td><a class="btn btn-danger" href="{% url 'order:backend_delete_superuser' line_id=prof.line_id %}">取消</a></td>
             </tr>
             {% endfor %}
         </tbody>
@@ -84,11 +84,11 @@
                 <tr>
                     <td hidden="hidden">{{ prof.line_id }}</td>
                     <td>{{ prof.line_name }}</td>
-                    <td><img src="{{ prof.line_picture_url }}"/></td>
+                    <td><img class="img-thumbnail" src="{{ prof.line_picture_url }}"/></td>
                     <td>{{ prof.phone }}</td>
                     <td>
-                        <a href="{% url 'order:backend_add_superuser' line_id=prof.line_id %}">管理員</a>
-                        <a href="{% url 'order:backend_add_staff' line_id=prof.line_id %}">員工</a>
+                        <a class="btn btn-success" href="{% url 'order:backend_add_superuser' line_id=prof.line_id %}">管理員</a>
+                        <a class="btn btn-success" href="{% url 'order:backend_add_staff' line_id=prof.line_id %}">員工</a>
                     </td>
                 </tr>
                 {% endfor %}

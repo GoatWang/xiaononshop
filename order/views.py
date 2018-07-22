@@ -52,7 +52,7 @@ def line_login_callback(request, app_name, view_name):
     post_data = {
         "grant_type": 'authorization_code',
         "code": request.GET['code'],
-        "redirect_uri": settings.LINE_CALLBACK_URL,
+        "redirect_uri": settings.LINE_CALLBACK_URL + app_name + "/" + view_name + "/",
         "client_id": settings.LINE_LOGIN_CHANNEL_ID,
         "client_secret": settings.LINE_LOGIN_CHANNEL_SECRET,
     }
@@ -61,7 +61,6 @@ def line_login_callback(request, app_name, view_name):
     }
     res = requests.post('https://api.line.me/oauth2/v2.1/token', data=post_data, headers=headers)
 
-    print("res.text", res.text)
     print("res.text", res.text)
     print("res.text", res.text)
     print("res.text", res.text)

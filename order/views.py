@@ -167,30 +167,38 @@ def order_list(request):
     else:
         user = request.user
         current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
-        df_current_orders = pd.DataFrame(current_orders)
-        df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
-        df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
-        df_current_orders['name'] = df_current_orders['bento__name']
-        df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
-        df_current_orders['number'] = df_current_orders['number']
-        df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
-        df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==datetime.now().date())
-        df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine', 'today']]
-
+        if len(current_orders) != 0:
+            df_current_orders = pd.DataFrame(current_orders)
+            df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
+            df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+            df_current_orders['name'] = df_current_orders['bento__name']
+            df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
+            df_current_orders['number'] = df_current_orders['number']
+            df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
+            df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==datetime.now().date())
+            df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine', 'today']]
+            current_orders = df_current_orders.T.to_dict().values
+        else:
+            current_orders = []
+            
         history_orders = list(Order.objects.filter(line_profile__user=user, bento__date__lt=datetime.now()).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date').reverse()[:10])
-        df_history_orders = pd.DataFrame(history_orders)
-        df_history_orders['row_id'] = pd.Series(df_history_orders.index).apply(lambda x:x+1)
-        df_history_orders['date'] = df_history_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
-        df_history_orders['name'] = df_history_orders['bento__name']
-        df_history_orders['type'] = df_history_orders['bento__bento_type__bento_type']
-        df_history_orders['number'] = df_history_orders['number']
-        df_history_orders['cuisine'] = df_history_orders['bento__cuisine']
-        df_history_orders = df_history_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
-
+        if len(history_orders) != 0:
+            df_history_orders = pd.DataFrame(history_orders)
+            df_history_orders['row_id'] = pd.Series(df_history_orders.index).apply(lambda x:x+1)
+            df_history_orders['date'] = df_history_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+            df_history_orders['name'] = df_history_orders['bento__name']
+            df_history_orders['type'] = df_history_orders['bento__bento_type__bento_type']
+            df_history_orders['number'] = df_history_orders['number']
+            df_history_orders['cuisine'] = df_history_orders['bento__cuisine']
+            df_history_orders = df_history_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
+            history_orders = df_history_orders.T.to_dict().values
+        else:
+            history_orders = []
+            
         context = {
             "title":"查看訂單",
-            "current_orders":df_current_orders.T.to_dict().values,
-            "history_orders":df_history_orders.T.to_dict().values
+            "current_orders":current_orders,
+            "history_orders":history_orders
         }
         return render(request, 'order/order_list.html', context)
 

@@ -381,8 +381,11 @@ def _handle_follow_event(event):
     if profile_exists:
         user = User.objects.get(username = line_id)
         line_profile = LineProfile.objects.get(user = user)
+        line_profile.line_name = profile.display_name
+        line_profile.line_picture_url = profile.picture_url
+        line_profile.line_status_message = profile.status_message
         line_profile.unfollow = False
-        line_profile.friend = False
+        line_profile.friend = True
         line_profile.save()
     else:
         user = User(username = line_id)

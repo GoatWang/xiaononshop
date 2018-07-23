@@ -38,11 +38,6 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 def line_login_callback(request, app_name, view_name):
-    print("request.GET", request.GET)
-    print("request.GET", request.GET)
-    print("request.GET", request.GET)
-    print("request.GET", request.GET)
-    
     post_data = {
         "grant_type": 'authorization_code',
         "code": request.GET['code'],
@@ -60,8 +55,16 @@ def line_login_callback(request, app_name, view_name):
     line_login_profile = eval(re.findall(b'\{.+?\}', line_login_profile_b64_decoded)[1].decode())
     line_id = line_login_profile.get('sub')
 
-    line_profile = LineProfile.objects.get(line_id=line_id)
-    user = line_profile.user
+    if LineProfile.objects.filter(line_id='1').count() == 0:
+        user = User(username = line_id)
+        user.save()
+        line_profile = LineProfile(
+            line_id = line_id,
+            user = user
+        )
+        line_profile.save()
+
+    user = LineProfile.objects.get(line_id=line_id).user
     auth.login(request, user)
     return redirect(get_redirect_url(request, app_name + "/" + view_name + "/"))
 
@@ -365,8 +368,12 @@ def _handle_follow_event(event):
     line_id = event.source.user_id
     profile = line_bot_api.get_profile(line_id)
     
-    profile_exists = User.objects.filter(username=line_id).count()
-    if profile_exists == 0:
+    profile_exists = User.objects.filter(username=line_id).count() != 0
+    if profile_exists:
+        user = User.objects.get(username = line_id)
+        line_profile = LineProfile.objects.get(user = user)
+        line_profile.unfollow = False
+    else:
         user = User(username = line_id)
         user.save()
         line_profile = LineProfile(
@@ -377,10 +384,6 @@ def _handle_follow_event(event):
             user = user
         )
         line_profile.save()
-    else:
-        user = User.objects.get(username = line_id)
-        line_profile = LineProfile.objects.get(user = user)
-        line_profile.unfollow = False
 
 def _handle_unfollow_event(event):
     line_id = event.source.user_id

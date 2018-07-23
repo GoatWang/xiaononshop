@@ -94,6 +94,6 @@ def get_line_login_api_url(request, state, app_name, view_name):
     #     callback = get_redirect_url(request, "/order/line_login_callback/" + app_name + "/" + view_name + "/")
     #     return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
     callback = get_redirect_url(request, "order/line_login_callback/" + app_name + "/" + view_name + "/")
-    return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid&bot_prompt=normal"
+    return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid&bot_prompt=aggressive"
 
 

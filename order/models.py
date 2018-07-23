@@ -25,6 +25,7 @@ class LineProfile(models.Model):
     job = models.ForeignKey('Job', blank=True, null=True, on_delete=models.CASCADE, verbose_name="職業")
     state = models.CharField(max_length=10, blank=True, null=True, verbose_name="狀態")
     unfollow = models.BooleanField(default=False, verbose_name="封鎖")
+    friend = models.BooleanField(default=True, verbose_name="好友")
     create_time = models.DateTimeField(auto_now=True, verbose_name="創建時間")
     def __str__(self):
         return str(self.line_name)

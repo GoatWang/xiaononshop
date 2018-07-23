@@ -55,12 +55,13 @@ def line_login_callback(request, app_name, view_name):
     line_login_profile = eval(re.findall(b'\{.+?\}', line_login_profile_b64_decoded)[1].decode())
     line_id = line_login_profile.get('sub')
 
-    if LineProfile.objects.filter(line_id='1').count() == 0:
+    if LineProfile.objects.filter(line_id=line_id).count() == 0:
         user = User(username = line_id)
         user.save()
         line_profile = LineProfile(
             line_id = line_id,
-            user = user
+            friend = False,
+            user = user 
         )
         line_profile.save()
 
@@ -381,6 +382,8 @@ def _handle_follow_event(event):
         user = User.objects.get(username = line_id)
         line_profile = LineProfile.objects.get(user = user)
         line_profile.unfollow = False
+        line_profile.friend = False
+        line_profile.save()
     else:
         user = User(username = line_id)
         user.save()
@@ -389,6 +392,7 @@ def _handle_follow_event(event):
             line_name = profile.display_name,
             line_picture_url = profile.picture_url,
             line_status_message=profile.status_message,
+            friend=True,
             user = user
         )
         line_profile.save()
@@ -397,6 +401,8 @@ def _handle_unfollow_event(event):
     line_id = event.source.user_id
     line_profile = LineProfile.objects.get(line_id=line_id)
     line_profile.unfollow = True
+    line_profile.friend = False
+    line_profile.save()
 
 ## handle message and event
 def _handle_text_msg(event):

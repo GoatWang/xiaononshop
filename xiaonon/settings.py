@@ -23,7 +23,6 @@ if 'LINE_CHANNEL_SECRET' in os.environ:
         "LINE_CHANNEL_SECRET" : os.environ.get('LINE_CHANNEL_SECRET'),
         "LINE_LOGIN_CHANNEL_ID" : os.environ.get('LINE_LOGIN_CHANNEL_ID'),
         "LINE_LOGIN_CHANNEL_SECRET" : os.environ.get('LINE_LOGIN_CHANNEL_SECRET'),
-        "LINE_CALLBACK_URL" : os.environ.get('LINE_CALLBACK_URL'),
         "POSTGRES_HOST" : os.environ.get('POSTGRES_HOST'),
         "POSTGRES_PORT" : os.environ.get('POSTGRES_PORT'),
         "POSTGRES_USERNAME" : os.environ.get('POSTGRES_USERNAME'),
@@ -180,7 +179,6 @@ LINE_CHANNEL_ACCESS_TOKEN = pwddata['LINE_CHANNEL_ACCESS_TOKEN']
 LINE_CHANNEL_SECRET = pwddata['LINE_CHANNEL_SECRET']
 LINE_LOGIN_CHANNEL_ID = pwddata['LINE_LOGIN_CHANNEL_ID']
 LINE_LOGIN_CHANNEL_SECRET = pwddata['LINE_LOGIN_CHANNEL_SECRET']
-LINE_CALLBACK_URL = pwddata['LINE_CALLBACK_URL']
 
 
 DOMAIN = 'https://xiaononshop.com/'

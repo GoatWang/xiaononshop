@@ -31,28 +31,35 @@ from urllib.parse import parse_qs, urlparse
 import requests
 from base64 import urlsafe_b64decode
 import re
-def redirect_self(request, to):
+import os
+
+def get_redirect_url(request, to):
     domain = request.META['HTTP_HOST']
     if domain.startswith("127"):
-        return redirect("http://" + domain + "/" + to)
+        return "http://" + domain + "/" + to
     else:
-        return redirect("https://" + domain + "/" + to)
+        return "https://" + domain + "/" + to
 
-def get_line_login_api_url(state, callback):
+def get_line_login_api_url(request, state, app_name, view_name):
+    # if 'LINE_CHANNEL_SECRET' not in os.environ:
+    #     user = LineProfile.objects.get(line_id="U3df9bb2a931d31b2ca900011f6bfda83").user
+    #     auth.login(request, user)
+    #     return get_redirect_url(request, app_name + "/" + view_name + "/")
+    # else:
+    #     callback = get_redirect_url(request, "/order/line_login_callback/" + app_name + "/" + view_name + "/")
+    #     return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
+    callback = get_redirect_url(request, "order/line_login_callback/" + app_name + "/" + view_name + "/")
     return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
 
 # ------------------------following are website----------------------------------------------
 def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
-    # return redirect_self(request, "order/order_create/")
 
 def line_login_callback(request, app_name, view_name):
-    url = request.path
-
     post_data = {
         "grant_type": 'authorization_code',
         "code": request.GET['code'],
-        "redirect_uri": settings.LINE_CALLBACK_URL + app_name + "/" + view_name + "/",
+        "redirect_uri": get_redirect_url(request, "order/line_login_callback/" + app_name + "/" + view_name + "/"),
         "client_id": settings.LINE_LOGIN_CHANNEL_ID,
         "client_secret": settings.LINE_LOGIN_CHANNEL_SECRET,
     }
@@ -69,16 +76,13 @@ def line_login_callback(request, app_name, view_name):
     line_profile = LineProfile.objects.get(line_id=line_id)
     user = line_profile.user
     auth.login(request, user)
-    return redirect_self(request, app_name + "/" + view_name + "/")
-
+    return redirect(get_redirect_url(request, app_name + "/" + view_name + "/"))
 
 @csrf_exempt #TODO: add csrf protect
 def order_create(request, area_id=1, distribution_place_id=1):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        callback = settings.LINE_CALLBACK_URL + 'order/order_create/'
-        return redirect(get_line_login_api_url(state, callback))
-
+        return redirect(get_line_login_api_url(request, state, 'order', 'order_create'))
     else:
         if request.method == "GET":
             areas = Area.objects.all()
@@ -100,39 +104,50 @@ def order_create(request, area_id=1, distribution_place_id=1):
                     output_adps.append(adp_dict)
 
             available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
-            available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
-            # {'bento__id': 26, 
-            # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
-            aws_url = "https://s3.amazonaws.com/xiaonon/"
-            df_available_bentos = pd.DataFrame(available_bentos)
-            df_available_bentos['id'] = df_available_bentos['bento__id']
-            df_available_bentos['name'] = df_available_bentos['bento__name']
-            df_available_bentos['date'] = df_available_bentos['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
-            df_available_bentos['bento_type'] = df_available_bentos['bento__bento_type__bento_type']
-            df_available_bentos['cuisine'] = df_available_bentos['bento__cuisine']
-            df_available_bentos['photo'] = df_available_bentos['bento__photo'].apply(lambda x:aws_url + x)
-            df_available_bentos['price'] = df_available_bentos['bento__price']
-            df_available_bentos['remain'] = df_available_bentos['remain'].astype(str)
-            df_available_bentos['select_range'] = df_available_bentos['remain'].apply(lambda x:list(range(0, 11)) if int(x)>=10 else list(range(0, int(x)+1)))
+            if len(available_bentos) == 0:
+                message = "目前沒有便當供應，請開學後再來找我喔。"
+                context = {
+                    "title":"目前沒有便當供應",
+                    "message": message
+                    }
+                # maybe directly redirect to order_list view
+                return render(request, 'order/message.html', context)
+            else:
+                available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
+                # {'bento__id': 26, 
+                # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
+                aws_url = "https://s3.amazonaws.com/xiaonon/"
+                df_available_bentos = pd.DataFrame(available_bentos)
+                df_available_bentos['id'] = df_available_bentos['bento__id']
+                df_available_bentos['name'] = df_available_bentos['bento__name']
+                df_available_bentos['date'] = df_available_bentos['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+                df_available_bentos['bento_type'] = df_available_bentos['bento__bento_type__bento_type']
+                df_available_bentos['cuisine'] = df_available_bentos['bento__cuisine']
+                df_available_bentos['photo'] = df_available_bentos['bento__photo'].apply(lambda x:aws_url + x)
+                df_available_bentos['price'] = df_available_bentos['bento__price']
+                df_available_bentos['remain'] = df_available_bentos['remain'].astype(str)
+                df_available_bentos['select_range'] = df_available_bentos['remain'].apply(lambda x:list(range(0, 11)) if int(x)>=10 else list(range(0, int(x)+1)))
 
-            df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain", "select_range"]]
-            df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
-            available_bentos = df_available_bentos.T.to_dict().values()
+                df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain", "select_range"]]
+                df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
+                available_bentos = df_available_bentos.T.to_dict().values()
 
-            context = {
-                'title':'多筆訂購',
-                'apds':output_adps,
-                'selected_adp_option_text':selected_adp_option_text,
-                'available_bentos':available_bentos,
-            }
-            return render(request, 'order/order_create.html', context)
+                context = {
+                    'title':'多筆訂購',
+                    'apds':output_adps,
+                    'selected_adp_option_text':selected_adp_option_text,
+                    'available_bentos':available_bentos,
+                    'user_phone':LineProfile.objects.get(user=request.user).phone
+                }
+                return render(request, 'order/order_create.html', context)
         if request.method == "POST":
             post_data = request.POST
             order_data = post_data['orderData']
-            user = request.user
-            line_profile = LineProfile.objects.get(user=user)
+            line_profile = LineProfile.objects.get(user=request.user)
+            line_profile.phone = post_data['user_phone']
+            line_profile.save()
             line_id = line_profile.line_id
-
+            
             all_success = True
             for od in eval(order_data):
                 bento_id = int(od['bento_id'])
@@ -158,14 +173,10 @@ def order_create(request, area_id=1, distribution_place_id=1):
 def order_list(request):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        callback = settings.LINE_CALLBACK_URL + 'order/order_list/'
-        return redirect(get_line_login_api_url(state, callback))
+        return redirect(get_line_login_api_url(request, state, 'order', 'order_list'))
     else:
         user = request.user
-        line_profile = LineProfile.objects.get(user=user)
-        line_id = line_profile.line_id
-        line_profile = LineProfile.objects.get(line_id=line_id)
-        current_orders = list(Order.objects.filter(line_profile=line_profile, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
+        current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
         df_current_orders = pd.DataFrame(current_orders)
         df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
         df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
@@ -173,9 +184,10 @@ def order_list(request):
         df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
         df_current_orders['number'] = df_current_orders['number']
         df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
-        df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
+        df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==datetime.now().date())
+        df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine', 'today']]
 
-        history_orders = list(Order.objects.filter(line_profile=line_profile, bento__date__lt=datetime.now()).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date').reverse()[:10])
+        history_orders = list(Order.objects.filter(line_profile__user=user, bento__date__lt=datetime.now()).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date').reverse()[:10])
         df_history_orders = pd.DataFrame(history_orders)
         df_history_orders['row_id'] = pd.Series(df_history_orders.index).apply(lambda x:x+1)
         df_history_orders['date'] = df_history_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
@@ -200,15 +212,15 @@ def order_delete(request, order_id):
     area_limitation.remain += order.number
     area_limitation.save()
 
-    ## TODO: test message view
+    line_id=LineProfile.objects.get(user=request.user).line_id
     message_date = str(order.bento.date.month) + "/" + str(order.bento.date.day)
-    messsage = "您已成功取消「" + message_date + " " + message_date.name + "」訂單!"
-    context = {
-        "title":"取消訂單成功",
-        "messsage": messsage
-        }
-    return render(request, 'order/message.html', context)
-    # return redirect_self(request,  "order/order_list/")
+    message = "您已成功取消「" + message_date + " " + message_date.name + "」訂單!"
+    line_bot_api.push_message(
+        line_id,
+        TextSendMessage(text=message)
+    )
+    return redirect(get_redirect_url(request, 'order/order_list/'))
+
 
 def backend_main_view(request):
     context = {
@@ -219,14 +231,13 @@ def backend_main_view(request):
 def backend_friend_list(request):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
-        return redirect(get_line_login_api_url(state, callback))
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_staff:
-            messsage = "is_superuser"
+            message = "is_superuser"
             context = {
                 "title":"此頁面必須具有管理員身分方能查閱，",
-                "messsage": messsage
+                "message": message
                 }
             return render(request, 'order/message.html', context)
         else:
@@ -248,33 +259,33 @@ def backend_friend_list(request):
 def backend_add_staff(request, line_id):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
-        return redirect(get_line_login_api_url(state, callback))
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_superuser:
-            messsage = "此頁面必須具有管理員身分方能查閱，"
+            message = "此頁面必須具有管理員身分方能查閱，"
             context = {
                 "title":"您沒有查閱權限",
-                "messsage": messsage
+                "message": message
                 }
             return render(request, 'order/message.html', context)
         else:
             user = LineProfile.objects.get(line_id=line_id).user
             user.is_staff = True
             user.save()
-            return redirect_self(request, 'order/backend_friend_list/')
+            return redirect(get_redirect_url(request, 'order/backend_friend_list/'))
+
+
 
 def backend_add_superuser(request, line_id):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
-        return redirect(get_line_login_api_url(state, callback))
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_superuser:
-            messsage = "此頁面必須具有管理員身分方能查閱。"
+            message = "此頁面必須具有管理員身分方能查閱。"
             context = {
                 "title":"您沒有查閱權限",
-                "messsage": messsage
+                "message": message
                 }
             return render(request, 'order/message.html', context)
         else:
@@ -282,57 +293,58 @@ def backend_add_superuser(request, line_id):
             user.is_staff = True
             user.is_superuser = True
             user.save()
-            return redirect_self(request, 'order/backend_friend_list/')
+            return redirect(get_redirect_url(request, 'order/backend_friend_list/'))
 
 def backend_delete_staff(request, line_id):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
-        return redirect(get_line_login_api_url(state, callback))
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_superuser:
-            messsage = "此頁面必須具有管理員身分方能查閱，"
+            message = "此頁面必須具有管理員身分方能查閱，"
             context = {
                 "title":"您沒有查閱權限",
-                "messsage": messsage
+                "message": message
                 }
             return render(request, 'order/message.html', context)
         else:
             user = LineProfile.objects.get(line_id=line_id).user
             user.is_staff = False
             user.save()
-            return redirect_self(request, 'order/backend_friend_list/')
+            return redirect(get_redirect_url(request, 'order/backend_friend_list/'))
 
 def backend_delete_superuser(request, line_id):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        callback = settings.LINE_CALLBACK_URL + 'order/backend_friend_list/'
-        return redirect(get_line_login_api_url(state, callback))
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_superuser:
-            messsage = "此頁面必須具有管理員身分方能查閱。"
+            message = "此頁面必須具有管理員身分方能查閱。"
             context = {
                 "title":"您沒有查閱權限",
-                "messsage": messsage
+                "message": message
                 }
             return render(request, 'order/message.html', context)
         else:
             user = LineProfile.objects.get(line_id=line_id).user
             user.is_superuser = False
             user.save()
-            return redirect_self(request, 'order/backend_friend_list/')
+            return redirect(get_redirect_url(request, 'order/backend_friend_list/'))
+
+
+
+
 
 def daily_output_order(request, area_id):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        callback = settings.LINE_CALLBACK_URL + 'order/daily_output_order/'
-        return redirect(get_line_login_api_url(state, callback))
+        return redirect(get_line_login_api_url(request, state, 'order', 'daily_output_order'))
     else:
         if not request.user.is_staff:
-            messsage = "此頁面必須具有管理員身分方能查閱，"
+            message = "此頁面必須具有管理員身分方能查閱，"
             context = {
                 "title":"您沒有查閱權限",
-                "messsage": messsage
+                "message": message
                 }
             return render(request, 'order/message.html', context)
         else:

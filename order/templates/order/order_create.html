@@ -21,7 +21,7 @@
     #priceTotalLabel {
         font-size:20px;
     }
-    #area_distribution_dropdown_div {
+    #areaDistributionDropdownDiv {
         margin-bottom: 15px;
     }
 </style>
@@ -30,7 +30,7 @@
 {% block content %}
 <h2>{{ title }}</h2>
 <h4>學校--取餐地點</h4>
-<div class="dropdown" id='area_distribution_dropdown_div'>
+<div class="dropdown" id='areaDistributionDropdownDiv'>
     <button class="btn btn-outline-secondary btn-block dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         {{ selected_adp_option_text }}
     </button>
@@ -113,6 +113,17 @@
         </div>
         <input type="text" class="form-control" aria-label="Text input with checkbox" disabled="disabled" value="同意小農要求您的email以便訂單確認。Agree xiaonon to request your email to confirm the order.">
     </div> -->
+    <form>
+        <div class="form-group">
+            <label for="userPhoneInput">聯絡電話</label>
+            {% if user_phone %}
+            <input type="tel" class="form-control" id="userPhoneInput" value="{{ user_phone }}" placeholder="0912345678">
+            {% else %}
+            <input type="tel" class="form-control" id="userPhoneInput" placeholder="0912345678">
+            {% endif %}
+            <small id="emailHelp" class="form-text text-muted">作為領取便當時確認身分用途</small>
+        </div>
+    </form>
     <div class="input-group mb-3">
         <button id="submitBtn" type="button" class="btn btn-outline-secondary">提交訂單</button>
     </div>
@@ -177,21 +188,29 @@
             }
         })
         
-        if(orderData.length != 0){
+        phone_reg = $("#userPhoneInput").val().match(/^09[\d]{8}/gm)
+        phone_valid = (phone_reg)? phone_reg[0] == $("#userPhoneInput").val():NaN
+        if(orderData.length == 0){
+            alert("請選擇您要的便當。")
+        }
+        else if(!phone_reg || !phone_valid)
+        {
+            alert("請輸入正確的電話號碼格式。")
+        }
+        else
+        {
             $.ajax({
                 type: 'POST',
                 url: '/order/order_create/',
-                data: {"orderData":JSON.stringify(orderData)},
+                data: {"orderData":JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val()},
                 dataType: 'json',
                 success: function (data) {
                     alert(data['message'])
-                    $('body').css('cursor','auto');
                 }
-              });
+            });
+            window.location = "{% url 'order:order_list' %}";
         }
-        else{
-            alert("請選擇您要的便當。")
-        }
+        $('body').css('cursor','auto');
     })
 
 </script>

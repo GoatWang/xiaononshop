@@ -40,7 +40,12 @@
                 <td>{{ co.price }}</td>
                 <td>{{ co.number }}</td>
                 <!-- <td>{{ co.cuisine }}</td> -->
-                <td><a href="{% url 'order:order_delete' order_id=co.id %}" class="btn btn-danger">取消</a></td>
+                {% if co.today %}
+                <!-- <td><input type="button" class="btn btn-danger" value="取消"></a></td> -->
+                <td><a href="{% url 'order:order_delete' order_id=co.id %}" class="btn btn-danger disabled">取消訂單</a></td>
+                {% else %}
+                <td><a href="{% url 'order:order_delete' order_id=co.id %}" class="btn btn-danger">取消訂單</a></td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

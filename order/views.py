@@ -38,6 +38,11 @@ def index(request):
     return HttpResponse("Hello, world. You're at the polls index.")
 
 def line_login_callback(request, app_name, view_name):
+    print("request.GET", request.GET)
+    print("request.GET", request.GET)
+    print("request.GET", request.GET)
+    print("request.GET", request.GET)
+    
     post_data = {
         "grant_type": 'authorization_code',
         "code": request.GET['code'],

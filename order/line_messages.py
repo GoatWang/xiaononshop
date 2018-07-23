@@ -31,9 +31,10 @@ def get_area_reply_messages():
         actions = []
         for btn in message_with_btns:
             remain = sum(AreaLimitation.objects.filter(area=btn, bento__date__gt=datetime.now().date(), bento__date__lte=datetime.now()+timedelta(5)).values_list('remain', flat=True))
+            label = btn.area+"(餘"+ str(remain) +"個)" if remain < 20 else btn.area
             actions.append(
                     PostbackTemplateAction(
-                            label=btn.area+"(餘"+ str(remain) +"個)",
+                            label= label,
                             data= "action=get_area_reply_messages&area_id="+str(btn.id)
                         )
                     )

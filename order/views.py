@@ -7,7 +7,7 @@ from xiaonon import settings
 from django.contrib.auth.models import User
 from django.contrib import auth
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
-from order.utl import get_order_detail, parse_url_query_string, create_order
+from order.utl import get_order_detail, parse_url_query_string, create_order, get_redirect_url, get_line_login_api_url
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -21,7 +21,7 @@ from linebot.models import (
 )
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
-from order.line_messages import get_order_date_reply_messages, get_area_reply_messages, get_distribution_place_reply_messages, get_bento_reply_messages, get_order_number_messages, get_order_confirmation_messages#, get_web_create_order_messages
+from order.line_messages import get_area_reply_messages, get_distribution_place_reply_messages
 
 import numpy as np
 from datetime import datetime, timedelta
@@ -32,24 +32,6 @@ import requests
 from base64 import urlsafe_b64decode
 import re
 import os
-
-def get_redirect_url(request, to):
-    domain = request.META['HTTP_HOST']
-    if domain.startswith("127"):
-        return "http://" + domain + "/" + to
-    else:
-        return "https://" + domain + "/" + to
-
-def get_line_login_api_url(request, state, app_name, view_name):
-    # if 'LINE_CHANNEL_SECRET' not in os.environ:
-    #     user = LineProfile.objects.get(line_id="U3df9bb2a931d31b2ca900011f6bfda83").user
-    #     auth.login(request, user)
-    #     return get_redirect_url(request, app_name + "/" + view_name + "/")
-    # else:
-    #     callback = get_redirect_url(request, "/order/line_login_callback/" + app_name + "/" + view_name + "/")
-    #     return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
-    callback = get_redirect_url(request, "order/line_login_callback/" + app_name + "/" + view_name + "/")
-    return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
 
 # ------------------------following are website----------------------------------------------
 def index(request):
@@ -400,92 +382,31 @@ def _handle_unfollow_event(event):
     line_profile = LineProfile.objects.get(line_id=line_id)
     line_profile.unfollow = True
 
-
 ## handle message and event
 def _handle_text_msg(event):
     text = event.message.text
-    line_id = event.source.user_id
     # user_name = line_bot_api.get_profile(line_id).display_name
-    line_profile = LineProfile.objects.get(line_id=line_id)
+    line_profile = LineProfile.objects.get(line_id=event.source.user_id)
     line_profile_state = line_profile.state
 
     if text == "動作: 開始訂購":
-        messages = get_order_date_reply_messages(event)
-    # elif text == "動作: 多筆訂購":
-    #     pwd = ''.join(np.random.randint(0, 9, 6).astype(str))
-    #     line_profile.state = "web_pwd:" + pwd
-    #     line_profile.save()
-    #     messages = get_web_create_order_messages(event, pwd, line_id)
-
-    elif line_profile_state == "phone":
-        line_profile.phone = str(text)
-        line_profile.state = "None"
-        line_profile.save()
-        messages = [TextSendMessage(text="您的電話號碼已經設定完成，謝謝您的配合。")]
+        messages = get_area_reply_messages()
     else:
         messages = [TextSendMessage(text="小農聽不懂您的意思，麻煩妳連絡客服人員喔!")]
         
     # elif text == "動作: 飯盒菜單":
     # elif text == "動作: 聯絡我們":
-    # messages = [TextSendMessage(text=user_name+": "+text)]
     line_bot_api.reply_message(
         event.reply_token,
         messages
     )
 
-def _handle_postback_event(event):
-    line_id = event.source.user_id
+def _handle_postback_event(event, request):
     postback_data = parse_url_query_string(event.postback.data)
-    
-    if postback_data['action'] == 'get_order_date_reply_messages':
-        date_string = postback_data['date_string']
-        messages = get_area_reply_messages(event, date_string)
-    elif postback_data['action'] == 'get_area_reply_messages':
-        date_string = postback_data['date_string']
-        area_id = postback_data['area_id']
-        messages = get_distribution_place_reply_messages(event, date_string, area_id)
-    elif postback_data['action'] == 'get_distribution_place_reply_messages':
-        date_string = postback_data['date_string']
-        area_id = postback_data['area_id']
-        distribution_place_id = postback_data['distribution_place_id']
-        messages = get_bento_reply_messages(event, date_string, area_id, distribution_place_id)
-    elif postback_data['action'] == 'get_bento_reply_messages':
-        date_string = postback_data['date_string']
-        area_id = postback_data['area_id']
-        distribution_place_id = postback_data['distribution_place_id']
-        bento_id = postback_data['bento_id']
-        messages = get_order_number_messages(event, date_string, area_id, distribution_place_id, bento_id)
-    elif postback_data['action'] == 'get_order_number_messages':
-        date_string = postback_data['date_string']
-        area_id = postback_data['area_id']
-        distribution_place_id = postback_data['distribution_place_id']
-        bento_id = postback_data['bento_id']
-        order_number = postback_data['order_number']
-        messages = get_order_confirmation_messages(event, date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
-    elif postback_data['action'] == 'get_order_confirmation_messages':
-        date_string = postback_data['date_string']
-        area_id = postback_data['area_id']
-        distribution_place_id = postback_data['distribution_place_id']
-        bento_id = postback_data['bento_id']
-        order_number = postback_data['order_number']
 
-        success = create_order(line_id, bento_id, order_number, area_id, distribution_place_id)
-        if success:
-            order_detail = get_order_detail(date_string, area_id, distribution_place_id, bento_id, order_number, line_id)
-            messages = [TextSendMessage(text="恭喜您訂購成功" + order_detail)]
-
-            line_profile = LineProfile.objects.get(line_id=line_id)
-            if not line_profile.phone:
-                line_profile.state = 'phone'
-                line_profile.save()
-                messages.extend([TextSendMessage(text="請留下您的電話，以方便我們聯絡您取餐: \nex. 0912345678")])
-    
-            # print("date_string", date_string)
-            # print("area_id", area_id)
-            # print("distribution_place_id", distribution_place_id)
-            # print("bento_id", bento_id)
-        else:
-            messages = [TextSendMessage(text="抱歉，剩餘便當不足，請從新開始訂購。")]
+    if postback_data['action'] == 'get_area_reply_messages':
+        area_id = postback_data['area_id']
+        messages = get_distribution_place_reply_messages(request, area_id)
 
     line_bot_api.reply_message(
         event.reply_token,
@@ -516,7 +437,7 @@ def callback(request):
             if isinstance(event, UnfollowEvent):
                 _handle_unfollow_event(event)
             if isinstance(event, PostbackEvent):
-                _handle_postback_event(event)
+                _handle_postback_event(event, request)
         return HttpResponse()
     else:
         return HttpResponseBadRequest()

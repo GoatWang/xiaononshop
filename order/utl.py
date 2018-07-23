@@ -75,3 +75,25 @@ def create_order(line_id, bento_id, order_number, area_id, distribution_place_id
     else:
         return False
 
+
+
+
+def get_redirect_url(request, to):
+    domain = request.META['HTTP_HOST']
+    if domain.startswith("127"):
+        return "http://" + domain + "/" + to
+    else:
+        return "https://" + domain + "/" + to
+
+def get_line_login_api_url(request, state, app_name, view_name):
+    # if 'LINE_CHANNEL_SECRET' not in os.environ:
+    #     user = LineProfile.objects.get(line_id="U3df9bb2a931d31b2ca900011f6bfda83").user
+    #     auth.login(request, user)
+    #     return get_redirect_url(request, app_name + "/" + view_name + "/")
+    # else:
+    #     callback = get_redirect_url(request, "/order/line_login_callback/" + app_name + "/" + view_name + "/")
+    #     return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
+    callback = get_redirect_url(request, "order/line_login_callback/" + app_name + "/" + view_name + "/")
+    return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
+
+

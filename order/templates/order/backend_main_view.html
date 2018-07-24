@@ -13,11 +13,29 @@
 
 {% block content %}
 <h2>{{ title }}</h2>
-<!-- <h4>近期訂單</h4> -->
-<div class="row">
-</div>
+<h4>帳號管理</h4>
+<ul>
+    <li>
+        <a href="{% url 'order:backend_friend_list' %}">好友清單</a>
+    </li>
+</ul>
 
+<h4>出貨</h4>
+<ul>
+    <li>
+        <a href="{% url 'order:beckend_daily_ouput_stats' %}">出貨統計</a>
+    </li>
+</ul>
 
+<h4>確認收貨</h4>
+<ul>
+    {% for area in areas %}
+    <li>
+        <a href="{% url 'order:backend_daily_output_order' area_id=area.id %}">{{ area.area }}出貨統計</a>
+    </li>
+    {% endfor %}
+</ul>
+    
 
 {% endblock %}
 {% block scripts %}

@@ -1,0 +1,72 @@
+{% extends "order/layout.html" %}
+{% load staticfiles %}
+
+
+{% block scripts_top %}
+{% endblock %}
+
+
+{% block styles %}
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+
+<h4>依學校統計</h4>
+<div class="row">
+    <table  class="table">
+        <thead>
+            <tr>
+                <th>學校</th>
+                <th>類型</th>
+                <th>便當</th>
+                <th>個數</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in order_list_groupby_area %}
+            <tr>
+                <td>{{ order.area }}</td>
+                <td>{{ order.bento_name }}</td>
+                <td>{{ order.bento_type }}</td>
+                <td>{{ order.number }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<h4>依地區統計</h4>
+<div class="row">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>學校</th>
+                <th>地點</th>
+                <th>類型</th>
+                <th>便當</th>
+                <th>個數</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in order_list_groupby_distribution_place %}
+            <tr>
+                <td>{{ order.area }}</td>
+                <td>{{ order.distribution_place }}</td>
+                <td>{{ order.bento_name }}</td>
+                <td>{{ order.bento_type }}</td>
+                <td>{{ order.number }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+</script>
+{% endblock %}

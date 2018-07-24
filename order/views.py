@@ -222,12 +222,6 @@ def order_delete(request, order_id):
 
 
 def backend_main_view(request):
-    context = {
-        "title":"後臺主頁"
-    }
-    return render(request, 'order/backend_main_view.html', context)
-
-def backend_friend_list(request):
     if not request.user.is_authenticated:
         state =  uuid4().hex
         return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
@@ -237,6 +231,25 @@ def backend_friend_list(request):
             context = {
                 "title":"此頁面必須具有管理員身分方能查閱，",
                 "message": message
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            areas = Area.objects.all()
+            context = {
+                "title":"後臺主頁",
+                "areas":areas
+            }
+            return render(request, 'order/backend_main_view.html', context)
+
+def backend_friend_list(request):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
+    else:
+        if not request.user.is_superuser:
+            context = {
+                "title":"您沒有查閱權限",
+                "message": "此頁面必須具有管理員身分方能查閱。"
                 }
             return render(request, 'order/message.html', context)
         else:
@@ -261,10 +274,9 @@ def backend_add_staff(request, line_id):
         return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_superuser:
-            message = "此頁面必須具有管理員身分方能查閱，"
             context = {
                 "title":"您沒有查閱權限",
-                "message": message
+                "message": "此頁面必須具有管理員身分方能查閱。"
                 }
             return render(request, 'order/message.html', context)
         else:
@@ -281,10 +293,9 @@ def backend_add_superuser(request, line_id):
         return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_superuser:
-            message = "此頁面必須具有管理員身分方能查閱。"
             context = {
                 "title":"您沒有查閱權限",
-                "message": message
+                "message": "此頁面必須具有管理員身分方能查閱。"
                 }
             return render(request, 'order/message.html', context)
         else:
@@ -300,10 +311,9 @@ def backend_delete_staff(request, line_id):
         return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_superuser:
-            message = "此頁面必須具有管理員身分方能查閱，"
             context = {
                 "title":"您沒有查閱權限",
-                "message": message
+                "message": "此頁面必須具有管理員身分方能查閱，"
                 }
             return render(request, 'order/message.html', context)
         else:
@@ -318,10 +328,9 @@ def backend_delete_superuser(request, line_id):
         return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_superuser:
-            message = "此頁面必須具有管理員身分方能查閱。"
             context = {
                 "title":"您沒有查閱權限",
-                "message": message
+                "message": "此頁面必須具有管理員身分方能查閱。"
                 }
             return render(request, 'order/message.html', context)
         else:
@@ -334,42 +343,106 @@ def backend_delete_superuser(request, line_id):
 
 
 
-def daily_output_order(request, area_id):
+def backend_daily_output_order(request, area_id):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        return redirect(get_line_login_api_url(request, state, 'order', 'daily_output_order'))
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_main_view'))
     else:
         if not request.user.is_staff:
-            message = "此頁面必須具有管理員身分方能查閱，"
             context = {
                 "title":"您沒有查閱權限",
-                "message": message
+                "message": "此頁面必須具有員工身分方能查閱。"
                 }
             return render(request, 'order/message.html', context)
         else:
-            order_list = Order.objects.filter(bento__date=datetime.now(), area=area_id).values_list('line_profile__line_name', 'line_profile__phone', 'bento__name', 'area__area', 'distribution_place__distribution_place', 'number', 'price', named=True).order_by("line_profile__line_name", "area__area", "distribution_place__distribution_place", "bento__name")
-            df_order_list = pd.DataFrame(list(order_list))
-            df_order_list['line_name'] = df_order_list['line_profile__line_name']
-            df_order_list['phone'] = df_order_list['line_profile__phone']
-            df_order_list['area'] = df_order_list['area__area']
-            df_order_list['distribution_place'] = df_order_list['distribution_place__distribution_place']
-            df_order_list['bento_name'] = df_order_list['bento__name']
-            df_order_list['number'] = df_order_list['number']
-            df_order_list['price'] = df_order_list['price']
-            df_order_list = df_order_list[['line_name', 'phone', 'area', 'distribution_place', 'bento_name', 'number', 'price']]
+            order_list = Order.objects.filter(bento__date=datetime.now(), area=area_id, delete_time=None).values_list('id', "line_profile__line_id", 'line_profile__line_name', 'line_profile__phone', 'bento__name', 'area__area', 'distribution_place__distribution_place', 'number', 'price', 'received', named=True).order_by("line_profile__line_name", "distribution_place__distribution_place", "bento__name")
+            if order_list.count() != 0:
+                df_order_list = pd.DataFrame(list(order_list))
+                df_order_list['order_id'] = df_order_list['id']
+                df_order_list['line_id'] = df_order_list['line_profile__line_id']
+                df_order_list['line_name'] = df_order_list['line_profile__line_name']
+                df_order_list['phone'] = df_order_list['line_profile__phone']
+                df_order_list['phone_last3'] = df_order_list['line_profile__phone'].apply(lambda x:x[-3:])
+                df_order_list['area'] = df_order_list['area__area']
+                df_order_list['distribution_place'] = df_order_list['distribution_place__distribution_place']
+                df_order_list['bento_name'] = df_order_list['bento__name']
+                df_order_list['number'] = df_order_list['number']
+                df_order_list['price'] = df_order_list['price']
+                df_order_list = df_order_list[['order_id', 'line_id', 'line_name', 'phone', 'phone_last3', 'area', 'distribution_place', 'bento_name', 'number', 'price', 'received']]
+                order_list = list(df_order_list.T.to_dict().values()).copy()
 
-            df_order_list_group = df_order_list.groupby(['area', 'distribution_place', 'bento_name']).count().reset_index()
-            df_order_list_group = df_order_list_group[['area', 'distribution_place', 'bento_name', 'number']]
-
+                df_order_list_group = df_order_list.groupby(['area', 'distribution_place', 'bento_name', 'received']).sum().reset_index()
+                df_order_list_group_received = df_order_list_group.loc[df_order_list_group['received']==True]
+                df_order_list_group_received.loc[:, 'received_number'] = df_order_list_group_received['number']
+                df_order_list_group_remain = df_order_list_group.loc[df_order_list_group['received']==False]
+                df_order_list_group_remain.loc[:, 'remain_number'] = df_order_list_group_remain['number']
+                df_order_list_group = pd.merge(df_order_list_group_received, df_order_list_group_remain, on=['area', 'distribution_place', 'bento_name'])
+                df_order_list_group = df_order_list_group[['area', 'distribution_place', 'bento_name', 'received_number', 'remain_number']]
+                order_list_group = list(df_order_list_group.T.to_dict().values()).copy()
+            else:
+                order_list = []
+                order_list_group = []
             area = Area.objects.get(id=area_id).area
             context ={
                 "title": area + "當日訂單",
-                "order_list":list(df_order_list.T.to_dict().values()),
-                "order_agg":list(df_order_list_group.T.to_dict().values())
+                "order_list":order_list,
+                "order_list_group":order_list_group
             }
-        return render(request, 'order/daily_output_order.html', context)
+        return render(request, 'order/backend_daily_output_order.html', context)
 
+def beckend_receive_order(request, order_id):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_main_view'))
+    else:
+        if not request.user.is_staff:
+            context = {
+                "title":"您沒有查閱權限",
+                "message": "此頁面必須具有員工身分方能查閱。"
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            order = Order.objects.get(pk=order_id)
+            order.received = True
+            order.save()
+            return JsonResponse({"message":"Success"})
 
+def beckend_daily_ouput_stats(request):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_main_view'))
+    else:
+        if not request.user.is_superuser:
+            context = {
+                "title":"您沒有查閱權限",
+                "message": "此頁面必須具有管理員身分方能查閱。"
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            order_list_groupby_area = Order.objects.filter(bento__date=datetime.now().date()).values_list('bento__name', 'bento__bento_type__bento_type', 'area__area', 'number', named=True).order_by('area__id', 'bento__bento_type__bento_type')
+            df_order_list_groupby_area = pd.DataFrame(list(order_list_groupby_area))
+            df_order_list_groupby_area['area'] = df_order_list_groupby_area['area__area']
+            df_order_list_groupby_area['bento_name'] = df_order_list_groupby_area['bento__name']
+            df_order_list_groupby_area['bento_type'] = df_order_list_groupby_area['bento__bento_type__bento_type']
+            df_order_list_groupby_area = df_order_list_groupby_area.groupby(['area', 'bento_type', 'bento_name']).sum().reset_index()[['area', 'bento_type', 'bento_name', 'number']]
+            order_list_groupby_area = list(df_order_list_groupby_area.T.to_dict().values()).copy()
+
+            order_list_groupby_distribution_place = Order.objects.filter(bento__date=datetime.now().date()).values_list('bento__name', 'bento__bento_type__bento_type', 'area__area', 'distribution_place__distribution_place', 'number', named=True).order_by('area__id',  'distribution_place__distribution_place', 'bento__bento_type__bento_type')
+            df_order_list_groupby_distribution_place = pd.DataFrame(list(order_list_groupby_distribution_place))
+            df_order_list_groupby_distribution_place['area'] = df_order_list_groupby_distribution_place['area__area']
+            df_order_list_groupby_distribution_place['distribution_place'] = df_order_list_groupby_distribution_place['distribution_place__distribution_place']
+            df_order_list_groupby_distribution_place['bento_name'] = df_order_list_groupby_distribution_place['bento__name']
+            df_order_list_groupby_distribution_place['bento_type'] = df_order_list_groupby_distribution_place['bento__bento_type__bento_type']
+            df_order_list_groupby_distribution_place = df_order_list_groupby_distribution_place.groupby(['area', 'distribution_place', 'bento_type', 'bento_name']).sum().reset_index()[['area', 'distribution_place', 'bento_type', 'bento_name', 'number']]
+            order_list_groupby_distribution_place = list(df_order_list_groupby_distribution_place.T.to_dict().values()).copy()
+
+            context ={
+                "title": "當日出貨統計",
+                "order_list_groupby_area":order_list_groupby_area,
+                "order_list_groupby_distribution_place":order_list_groupby_distribution_place
+            }
+            return render(request, 'order/beckend_daily_ouput_stats.html', context)
+                   
 
 # ------------------------following are line bot---------------------------------------------
 

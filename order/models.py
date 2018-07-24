@@ -79,6 +79,7 @@ class Order(models.Model):
     distribution_place = models.ForeignKey("DistributionPlace", on_delete=models.CASCADE, verbose_name="發放地點")
     number = models.IntegerField(verbose_name="數量")
     price = models.IntegerField(default=120, verbose_name="價格")
+    received = models.BooleanField(default=False, verbose_name="已領取")
     create_time = models.DateTimeField(auto_now_add=True, verbose_name="創建時間")
     delete_time = models.DateTimeField(null=True, default=None)
     def __str__(self):

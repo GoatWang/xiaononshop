@@ -150,7 +150,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 if not success: all_success=False
             
             if all_success: 
-                res_message = "謝謝你選擇照顧這片土地也照顧自己	，我們午餐時間見！\n若想查看或取消訂單，請直接點選'我的訂單'就可以囉！" #TODO: 回饋訂單查詢URL
+                res_message = "謝謝你選擇照顧這片土地也照顧自己，我們午餐時間見！\n若想查看或取消訂單，請直接點選'我的訂單'就可以囉！" #TODO: 回饋訂單查詢URL
             else: 
                 res_message = "部分訂單因數量不足，請從新訂購。" #TODO: 回饋失敗部分
 
@@ -213,7 +213,7 @@ def order_delete(request, order_id):
 
     line_id=LineProfile.objects.get(user=request.user).line_id
     message_date = str(order.bento.date.month) + "/" + str(order.bento.date.day)
-    message = "您已成功取消「" + message_date + " " + message_date.name + "」訂單!"
+    message = "您已成功取消「" + message_date + " " + order.bento.name + "」訂單!"
     line_bot_api.push_message(
         line_id,
         TextSendMessage(text=message)
@@ -227,10 +227,9 @@ def backend_main_view(request):
         return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
     else:
         if not request.user.is_staff:
-            message = "is_superuser"
             context = {
-                "title":"此頁面必須具有管理員身分方能查閱，",
-                "message": message
+                "title":"您沒有查閱權限",
+                "message": "此頁面必須具有員工身分方能查閱。"
                 }
             return render(request, 'order/message.html', context)
         else:

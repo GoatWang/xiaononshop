@@ -111,8 +111,6 @@ def get_order_list_reply(user):
         print("current_orders[0]['name']", current_orders[0]['name'])
         print("current_orders[0]['number']", current_orders[0]['number'])
         print("len(current_orders)", len(current_orders))
-
-        'bento_imgs/紅麴燒豬肉_2018-06-21_005ff651ea664b3bbf70ecf9cbf3f89a.png'
         carousel_columns = []
         for order in current_orders:
             carousel_column = CarouselColumn(
@@ -147,5 +145,5 @@ def get_order_list_reply(user):
                 ]
             )
         )
-        # return [carousel_template_message, buttons_template_message]
-        return [buttons_template_message]
+        return [carousel_template_message, buttons_template_message]
+        # return [buttons_template_message]

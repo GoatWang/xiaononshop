@@ -177,7 +177,7 @@ def order_list(request):
             df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
             df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==datetime.now().date())
             df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine', 'today']]
-            current_orders = df_current_orders.T.to_dict().values
+            current_orders = df_current_orders.T.to_dict().values()
         else:
             current_orders = []
             
@@ -191,7 +191,7 @@ def order_list(request):
             df_history_orders['number'] = df_history_orders['number']
             df_history_orders['cuisine'] = df_history_orders['bento__cuisine']
             df_history_orders = df_history_orders[['row_id', 'id','date','name','type', 'price','number','cuisine']]
-            history_orders = df_history_orders.T.to_dict().values
+            history_orders = df_history_orders.T.to_dict().values()
         else:
             history_orders = []
             
@@ -483,16 +483,7 @@ def _handle_text_msg(event, request):
     elif text == "動作: 本週菜色":
         messages = [TextSendMessage(text="本功能即將推出，敬請期待!")]
     elif text == "動作: 查看訂單":
-        print("動作: 查看訂單")
-        print("動作: 查看訂單")
-        print("動作: 查看訂單")
         messages = get_order_list_reply(user)
-
-        print("len(messages)", len(messages))
-        print("len(messages)", len(messages))
-        print("len(messages)", len(messages))
-        print("len(messages)", len(messages))
-        print("len(messages)", len(messages))
     else:
         messages = [TextSendMessage(text="小農聽不懂您的意思，麻煩妳連絡客服人員喔!")]
         

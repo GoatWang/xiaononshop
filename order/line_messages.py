@@ -103,13 +103,8 @@ def get_order_list_reply(user):
         df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
         df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==datetime.now().date())
         df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine', 'today']]
-        current_orders = df_current_orders.T.to_dict().values
-        print("current_orders", current_orders)
-        print("current_orders", current_orders)
-        print("current_orders", current_orders)
-        print("current_orders", current_orders)
-        print("current_orders", current_orders)
-        
+        current_orders = df_current_orders.T.to_dict().values()
+
         CarouselColumns = []
         for order in current_orders:
             ccol = CarouselColumn(

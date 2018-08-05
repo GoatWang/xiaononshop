@@ -70,6 +70,11 @@ def line_login_callback(request, app_name, view_name):
 
 @csrf_exempt #TODO: add csrf protect
 def order_create(request, area_id=1, distribution_place_id=1):
+    print("order_create", order_create)
+    print("order_create", order_create)
+    print("order_create", order_create)
+    print("order_create", order_create)
+    print("order_create", order_create)
     if not request.user.is_authenticated:
         state =  uuid4().hex
         return redirect(get_line_login_api_url(request, state, 'order', 'order_create'))

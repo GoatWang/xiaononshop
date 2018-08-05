@@ -98,7 +98,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                         adp_dict['selected'] = False
                     output_adps.append(adp_dict)
 
-            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).order_by('bento__date').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
             if len(available_bentos) == 0:
                 message = "目前沒有便當供應，請開學後再來找我喔。"
                 context = {
@@ -108,7 +108,6 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 # maybe directly redirect to order_list view
                 return render(request, 'order/message.html', context)
             else:
-                # available_bentos = sorted(available_bentos, key=lambda x:x['remain'], reverse=True)
                 # {'bento__id': 26, 
                 # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
                 aws_url = "https://s3.amazonaws.com/xiaonon/"
@@ -125,6 +124,8 @@ def order_create(request, area_id=1, distribution_place_id=1):
 
                 df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain", "select_range"]]
                 df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
+                print("df_available_bentos['date']", df_available_bentos['date'])
+                print("df_available_bentos['bento_type']", df_available_bentos['bento_type'])
                 available_bentos = df_available_bentos.T.to_dict().values()
 
                 context = {

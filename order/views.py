@@ -133,6 +133,10 @@ def order_create(request, area_id=1, distribution_place_id=1):
         if request.method == "POST":
             post_data = request.POST
             order_data = post_data['orderData']
+            print("order_data", order_data)
+            print("order_data", order_data)
+            print("order_data", order_data)
+            print("order_data", order_data)
             line_profile = LineProfile.objects.get(user=request.user)
             line_profile.phone = post_data['user_phone']
             line_profile.save()
@@ -216,7 +220,7 @@ def order_delete(request, order_id):
     message = delete_order(order_id, line_id)
     line_bot_api.push_message(
         line_id,
-        TextSendMessage(text=message)
+        message
     )
     return redirect(get_redirect_url(request, 'order/order_list/'))
 

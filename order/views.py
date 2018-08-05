@@ -112,7 +112,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 # {'bento__id': 26, 
                 # 'bento__name': '避風塘鮮雞', 'bento__bento_type__bento_type': '均衡吃飽飽', 'bento__cuisine': '洋菇青江菜、蒜酥馬鈴薯&地瓜、涼拌小黃瓜', 'bento__photo': 'bento_imgs/避風塘鮮雞_2018-06-22_a9ad7545a61545759f08a31569a89fad.png', 'bento__price': 120, 'remain': 100}]
                 aws_url = "https://s3.amazonaws.com/xiaonon/"
-                df_available_bentos = pd.DataFrame(available_bentos)
+                df_available_bentos = pd.DataFrame(list(available_bentos))
                 df_available_bentos['id'] = df_available_bentos['bento__id']
                 df_available_bentos['name'] = df_available_bentos['bento__name']
                 df_available_bentos['date'] = df_available_bentos['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))

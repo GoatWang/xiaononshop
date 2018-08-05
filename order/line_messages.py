@@ -99,7 +99,7 @@ def get_order_list_reply(user):
         df_current_orders['name'] = df_current_orders['bento__name']
         df_current_orders['number'] = df_current_orders['number']
         df_current_orders['distribution_place'] = df_current_orders['distribution_place__distribution_place']
-        df_current_orders = df_current_orders[['id','date', 'photo', 'name','number']]
+        df_current_orders = df_current_orders[['id','date', 'photo', 'name','number','distribution_place']]
         current_orders = list(df_current_orders.T.to_dict().values())
 
         carousel_columns = []

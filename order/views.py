@@ -485,9 +485,8 @@ def _handle_text_msg(event):
         print("動作: 本周菜色")
         print("動作: 本周菜色")
         messages = [TextSendMessage(text="本功能即將推出，敬請期待!")]
-    elif text == "動作: 本周菜色":
-
-        messages = [TextSendMessage(text="本業面僅提供五筆訂單資訊，查看完整訂單資訊，請點擊下面按鈕。")]
+    elif text == "動作: 查看訂單":
+        messages = get_order_list_reply(request)
     else:
         messages = [TextSendMessage(text="小農聽不懂您的意思，麻煩妳連絡客服人員喔!")]
         

@@ -91,6 +91,7 @@ def get_order_list_reply(request):
     current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__photo', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date')[:5])
     if len(current_orders) == 0:
         messages = [TextSendMessage(text="您近期還沒有新的訂單喔~")]
+        return messages
     else:
         df_current_orders = pd.DataFrame(current_orders)
         df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
@@ -117,51 +118,25 @@ def get_order_list_reply(request):
                             )
                         ]
                     )
+            CarouselColumns.append(ccol)
 
         carousel_template_message = TemplateSendMessage(
-            alt_text='Carousel template',
+            alt_text='近期訂單',
             template=CarouselTemplate(
-                columns=[
-                    CarouselColumn(
-                        thumbnail_image_url='https://example.com/item1.jpg',
-                        title='this is menu1',
-                        text='description1',
-                        actions=[
-                            PostbackAction(
-                                label='postback1',
-                                text='postback text1',
-                                data='action=buy&itemid=1'
-                            ),
-                            MessageAction(
-                                label='message1',
-                                text='message text1'
-                            ),
-                            URIAction(
-                                label='uri1',
-                                uri='http://example.com/1'
-                            )
-                        ]
-                    ),
-                    CarouselColumn(
-                        thumbnail_image_url='https://example.com/item2.jpg',
-                        title='this is menu2',
-                        text='description2',
-                        actions=[
-                            PostbackAction(
-                                label='postback2',
-                                text='postback text2',
-                                data='action=buy&itemid=2'
-                            ),
-                            MessageAction(
-                                label='message2',
-                                text='message text2'
-                            ),
-                            URIAction(
-                                label='uri2',
-                                uri='http://example.com/2'
-                            )
-                        ]
+                columns=CarouselColumns
+            )
+        )
+
+        buttons_template_message = TemplateSendMessage(
+            alt_text='查看訂單提醒',
+            template=ButtonsTemplate(
+                text='本頁面僅提供五筆訂單資訊，查看完整訂單資訊，請點擊下面按鈕。',
+                actions=[
+                    URITemplateAction(
+                        label='完整訂單資訊',
+                        uri=settings.DOMAIN + 'order/order_list/'
                     )
                 ]
             )
         )
+        return [carousel_template_message, buttons_template_message]

@@ -523,8 +523,19 @@ def callback(request):
     print("callback")
     if request.method == 'POST':
         signature = request.META['HTTP_X_LINE_SIGNATURE']
-        body = request.body.decode('utf-8')
+        print("signature", signature)
+        print("signature", signature)
+        print("signature", signature)
+        print("signature", signature)
+        print("signature", signature)
         
+        body = request.body.decode('utf-8')
+        print("body", body)
+        print("body", body)
+        print("body", body)
+        print("body", body)
+        print("body", body)
+
         try:
             events = parser.parse(body, signature)
             print("events", events)

@@ -144,10 +144,18 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 order_number = int(od['order_number'])
                 area_id = int(od['area_id'])
                 distribution_place_id = int(od['distribution_place_id'])
+                print("line_id", line_id)
+                print("bento_id", bento_id)
+                print("order_number", order_number)
+                print("area_id", area_id)
+                print("distribution_place_id", distribution_place_id)
                 #TODO: add price column
                 success = create_order(line_id, bento_id, order_number, area_id, distribution_place_id)
                 if not success: all_success=False
             
+            print("all_success", all_success)
+            print("all_success", all_success)
+            print("all_success", all_success)
             if all_success: 
                 res_message = "謝謝你選擇照顧這片土地也照顧自己，我們午餐時間見！\n若想查看或取消訂單，請直接點選'我的訂單'就可以囉！" #TODO: 回饋訂單查詢URL
             else: 

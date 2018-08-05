@@ -105,12 +105,6 @@ def get_order_list_reply(user):
         df_current_orders = df_current_orders[['row_id', 'id','date', 'photo', 'name','type', 'price','number','cuisine', 'today']]
         current_orders = list(df_current_orders.T.to_dict().values())
 
-
-        print("current_orders[0]['photo']", current_orders[0]['photo'])
-        print("current_orders[0]['date']", current_orders[0]['date'])
-        print("current_orders[0]['name']", current_orders[0]['name'])
-        print("current_orders[0]['number']", current_orders[0]['number'])
-        print("len(current_orders)", len(current_orders))
         carousel_columns = []
         for order in current_orders:
             carousel_column = CarouselColumn(

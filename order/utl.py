@@ -59,8 +59,14 @@ def create_order(line_id, bento_id, order_number, area_id, distribution_place_id
     target_bento = Bento.objects.get(id=bento_id)
     target_area = Area.objects.get(id=area_id)
     target_distribution_place = DistributionPlace.objects.get(id=distribution_place_id)
-
+    print("target_line_profile", target_line_profile)
+    print("target_bento", target_bento)
+    print("target_area", target_area)
+    print("target_distribution_place", target_distribution_place)
     area_limitation = AreaLimitation.objects.get(bento=target_bento, area=target_area)
+    
+    print("Order.objects.all().count()", Order.objects.all().count())
+    print("area_limitation.remain >= int(order_number)", area_limitation.remain >= int(order_number))
     if area_limitation.remain >= int(order_number):
         Order.objects.create(
             line_profile=target_line_profile,
@@ -72,6 +78,8 @@ def create_order(line_id, bento_id, order_number, area_id, distribution_place_id
 
         area_limitation.remain -= int(order_number)
         area_limitation.save()
+        print("Order.objects.all().count()", Order.objects.all().count())
+
         return True
     else:
         return False
@@ -107,7 +115,7 @@ def delete_order(order_id, line_id):
     area_limitation.save()
 
     message_date = str(order.bento.date.month) + "/" + str(order.bento.date.day)
-    message = "您已成功取消「" + message_date + " " + order.bento.name + "」訂單!"
+    message = TextSendMessage(text="您已成功取消「" + message_date + " " + order.bento.name + "」訂單!")
     return message
 
 

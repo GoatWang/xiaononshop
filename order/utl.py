@@ -4,6 +4,7 @@ line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 from datetime import datetime
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 
+from linebot.models import TextSendMessage
 weekday_zh_mapping = {
     0: "一",
     1: "二",
@@ -95,5 +96,18 @@ def get_line_login_api_url(request, state, app_name, view_name):
     #     return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid"
     callback = get_redirect_url(request, "order/line_login_callback/" + app_name + "/" + view_name + "/")
     return "https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=1594806265&redirect_uri=" + callback + "&state=" + state + "&scope=openid&bot_prompt=aggressive"
+
+
+def delete_order(order_id, line_id):
+    order = Order.objects.get(id=order_id)
+    order.delete_time = datetime.now()
+    order.save()
+    area_limitation = AreaLimitation.objects.get(bento=order.bento, area=order.area)
+    area_limitation.remain += order.number
+    area_limitation.save()
+
+    message_date = str(order.bento.date.month) + "/" + str(order.bento.date.day)
+    message = "您已成功取消「" + message_date + " " + order.bento.name + "」訂單!"
+    return message
 
 

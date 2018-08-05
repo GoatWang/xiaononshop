@@ -83,3 +83,85 @@ def get_distribution_place_reply_messages(request, area_id):
             )
         messages.append(buttons_template_message)
     return messages
+
+
+
+def get_order_list_reply(request):
+    user = request.user
+    current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__photo', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date')[:5])
+    if len(current_orders) == 0:
+        messages = [TextSendMessage(text="您近期還沒有新的訂單喔~")]
+    else:
+        df_current_orders = pd.DataFrame(current_orders)
+        df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
+        df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
+        df_current_orders['photo'] = df_current_orders['bento__photo']
+        df_current_orders['name'] = df_current_orders['bento__name']
+        df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
+        df_current_orders['number'] = df_current_orders['number']
+        df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
+        df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==datetime.now().date())
+        df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine', 'today']]
+        current_orders = df_current_orders.T.to_dict().values
+
+        CarouselColumns = []
+        for order in current_orders:
+            ccol = CarouselColumn(
+                        thumbnail_image_url=order['photo'],
+                        title='this is menu1',
+                        text='description1',
+                        actions=[
+                            PostbackTemplateAction(
+                                label='取消訂單',
+                                data='action=order_delete&id=' + str(order['id'])
+                            )
+                        ]
+                    )
+
+        carousel_template_message = TemplateSendMessage(
+            alt_text='Carousel template',
+            template=CarouselTemplate(
+                columns=[
+                    CarouselColumn(
+                        thumbnail_image_url='https://example.com/item1.jpg',
+                        title='this is menu1',
+                        text='description1',
+                        actions=[
+                            PostbackAction(
+                                label='postback1',
+                                text='postback text1',
+                                data='action=buy&itemid=1'
+                            ),
+                            MessageAction(
+                                label='message1',
+                                text='message text1'
+                            ),
+                            URIAction(
+                                label='uri1',
+                                uri='http://example.com/1'
+                            )
+                        ]
+                    ),
+                    CarouselColumn(
+                        thumbnail_image_url='https://example.com/item2.jpg',
+                        title='this is menu2',
+                        text='description2',
+                        actions=[
+                            PostbackAction(
+                                label='postback2',
+                                text='postback text2',
+                                data='action=buy&itemid=2'
+                            ),
+                            MessageAction(
+                                label='message2',
+                                text='message text2'
+                            ),
+                            URIAction(
+                                label='uri2',
+                                uri='http://example.com/2'
+                            )
+                        ]
+                    )
+                ]
+            )
+        )

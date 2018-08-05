@@ -1,13 +1,22 @@
+import numpy as np
+from datetime import datetime, timedelta
+import pandas as pd
+from uuid import uuid4
+from urllib.parse import parse_qs, urlparse
+import requests
+from base64 import urlsafe_b64decode
+import re
+import os
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden, JsonResponse
-
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
 from xiaonon import settings
 from django.contrib.auth.models import User
 from django.contrib import auth
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
-from order.utl import get_order_detail, parse_url_query_string, create_order, get_redirect_url, get_line_login_api_url
+from order.utl import get_order_detail, parse_url_query_string, create_order, get_redirect_url, get_line_login_api_url, delete_order
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -22,16 +31,6 @@ from linebot.models import (
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 from order.line_messages import get_area_reply_messages, get_distribution_place_reply_messages
-
-import numpy as np
-from datetime import datetime, timedelta
-import pandas as pd
-from uuid import uuid4
-from urllib.parse import parse_qs, urlparse
-import requests
-from base64 import urlsafe_b64decode
-import re
-import os
 
 # ------------------------following are website----------------------------------------------
 def index(request):
@@ -124,7 +123,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 available_bentos = df_available_bentos.T.to_dict().values()
 
                 context = {
-                    'title':'多筆訂購',
+                    'title':'馬上訂購',
                     'apds':output_adps,
                     'selected_adp_option_text':selected_adp_option_text,
                     'available_bentos':available_bentos,
@@ -204,16 +203,8 @@ def order_list(request):
         return render(request, 'order/order_list.html', context)
 
 def order_delete(request, order_id):
-    order = Order.objects.get(id=order_id)
-    order.delete_time = datetime.now()
-    order.save()
-    area_limitation = AreaLimitation.objects.get(bento=order.bento, area=order.area)
-    area_limitation.remain += order.number
-    area_limitation.save()
-
     line_id=LineProfile.objects.get(user=request.user).line_id
-    message_date = str(order.bento.date.month) + "/" + str(order.bento.date.day)
-    message = "您已成功取消「" + message_date + " " + order.bento.name + "」訂單!"
+    message = delete_order(order_id, line_id)
     line_bot_api.push_message(
         line_id,
         TextSendMessage(text=message)
@@ -486,8 +477,17 @@ def _handle_text_msg(event):
     line_profile = LineProfile.objects.get(line_id=event.source.user_id)
     line_profile_state = line_profile.state
 
-    if text == "動作: 開始訂購":
+    if text == "動作: 馬上訂購":
         messages = get_area_reply_messages()
+    elif text == "動作: 本周菜色":
+        print("動作: 本周菜色")
+        print("動作: 本周菜色")
+        print("動作: 本周菜色")
+        print("動作: 本周菜色")
+        messages = [TextSendMessage(text="本功能即將推出，敬請期待!")]
+    elif text == "動作: 本周菜色":
+
+        messages = [TextSendMessage(text="本業面僅提供五筆訂單資訊，查看完整訂單資訊，請點擊下面按鈕。")]
     else:
         messages = [TextSendMessage(text="小農聽不懂您的意思，麻煩妳連絡客服人員喔!")]
         
@@ -500,11 +500,16 @@ def _handle_text_msg(event):
 
 def _handle_postback_event(event, request):
     postback_data = parse_url_query_string(event.postback.data)
-
     if postback_data['action'] == 'get_area_reply_messages':
         area_id = postback_data['area_id']
         messages = get_distribution_place_reply_messages(request, area_id)
-
+    
+    elif postback_data['action'] == 'order_delete':
+        line_id = event.source.user_id
+        order_id=postback_data['id']
+        message = delete_order(order_id, line_id)
+        messages = [message]
+        
     line_bot_api.reply_message(
         event.reply_token,
         messages

@@ -473,10 +473,13 @@ def _handle_unfollow_event(event):
 ## handle message and event
 def _handle_text_msg(event, request):
     text = event.message.text
+    print("texttexttext", text)
+    print("texttexttext", text)
+    print("texttexttext", text)
+    print("texttexttext", text)
     # user_name = line_bot_api.get_profile(line_id).display_name
     line_profile = LineProfile.objects.get(line_id=event.source.user_id)
     line_profile_state = line_profile.state
-    text = text.decode()
 
     if text == "動作: 馬上訂購":
         messages = get_area_reply_messages()

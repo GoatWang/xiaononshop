@@ -126,18 +126,18 @@ def get_order_list_reply(user):
                 columns=carousel_columns
             )
         )
-        return [carousel_template_message]
 
-        # buttons_template_message = TemplateSendMessage(
-        #     alt_text='查看訂單提醒',
-        #     template=ButtonsTemplate(
-        #         text='本頁面僅提供五筆訂單資訊，查看完整訂單資訊，請點擊下面按鈕。',
-        #         actions=[
-        #             URITemplateAction(
-        #                 label='完整訂單資訊',
-        #                 uri=settings.DOMAIN + 'order/order_list/'
-        #             )
-        #         ]
-        #     )
-        # )
+        buttons_template_message = TemplateSendMessage(
+            alt_text='查看訂單提醒',
+            template=ButtonsTemplate(
+                text='本頁面僅提供五筆訂單資訊，查看完整訂單資訊，請點擊下面按鈕。',
+                actions=[
+                    URITemplateAction(
+                        label='完整訂單資訊',
+                        uri=settings.DOMAIN + 'order/order_list/'
+                    )
+                ]
+            )
+        )
         # return [carousel_template_message, buttons_template_message]
+        return [buttons_template_message]

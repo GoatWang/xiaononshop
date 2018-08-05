@@ -502,7 +502,7 @@ def _handle_postback_event(event, request):
         messages = get_distribution_place_reply_messages(request, area_id)
     
     elif postback_data['action'] == 'order_delete':
-        line_id = int(event.source.user_id)
+        line_id = event.source.user_id
         order_id = int(postback_data['id'])
         message = delete_order(order_id, line_id)
         messages = [message]

@@ -98,7 +98,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                         adp_dict['selected'] = False
                     output_adps.append(adp_dict)
 
-            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).reverse().values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).order_by('bento__date').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
             if len(available_bentos) == 0:
                 message = "目前沒有便當供應，請開學後再來找我喔。"
                 context = {

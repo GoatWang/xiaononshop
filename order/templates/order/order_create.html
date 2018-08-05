@@ -199,8 +199,6 @@
         }
         else
         {
-            alert(JSON.stringify(orderData))
-            alert($("#userPhoneInput").val())
             $.ajax({
                 type: 'POST',
                 url: '{% url "order:order_create" %}',
@@ -209,9 +207,9 @@
                 success: function (data) {
                     alert(data['message'])
                 },
-                error: function () {
-                    alert("fail!!!!!!!!");
-                }
+                error: function (jqXHR, exception) {
+                        alert('Uncaught Error.\n' + jqXHR.responseText)
+                    }
             });
             window.location = "{% url 'order:order_list' %}";
         }

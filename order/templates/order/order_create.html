@@ -204,14 +204,19 @@
                 url: '{% url "order:order_create" %}',
                 data: {"orderData":JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val()},
                 dataType: 'json',
-                success: function (data) {
-                    alert(data['message'])
-                },
-                error: function (jqXHR, exception) {
-                        alert('Uncaught Error.\n' + jqXHR.responseText)
-                    }
+//                success: function (data) {
+//                    alert(data['message'])
+//                },
+//                error: function (jqXHR, exception) {
+//                        alert('Uncaught Error.\n' + jqXHR.responseText)
+//                    }
             });
-            window.location = "{% url 'order:order_list' %}";
+            function sleep (time) {
+                return new Promise((resolve) => setTimeout(resolve, time));
+            }
+            sleep(1500).then(() => {
+                window.location = "{% url 'order:order_list' %}";
+            });
         }
         $('body').css('cursor','auto');
     })

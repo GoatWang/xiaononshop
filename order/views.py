@@ -70,11 +70,6 @@ def line_login_callback(request, app_name, view_name):
 
 @csrf_exempt #TODO: add csrf protect
 def order_create(request, area_id=1, distribution_place_id=1):
-    print("order_create", order_create)
-    print("order_create", order_create)
-    print("order_create", order_create)
-    print("order_create", order_create)
-    print("order_create", order_create)
     if not request.user.is_authenticated:
         state =  uuid4().hex
         return redirect(get_line_login_api_url(request, state, 'order', 'order_create'))
@@ -123,9 +118,6 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 df_available_bentos['select_range'] = df_available_bentos['remain'].apply(lambda x:list(range(0, 11)) if int(x)>=10 else list(range(0, int(x)+1)))
 
                 df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain", "select_range"]]
-                # df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
-                print("df_available_bentos['date']", df_available_bentos['date'])
-                print("df_available_bentos['bento_type']", df_available_bentos['bento_type'])
                 available_bentos = df_available_bentos.T.to_dict().values()
 
                 context = {
@@ -137,14 +129,8 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 }
                 return render(request, 'order/order_create.html', context)
         if request.method == "POST":
-            print('request.method == "POST"', request.method == "POST")
-            print('request.method == "POST"', request.method == "POST")
             post_data = request.POST
             order_data = post_data['orderData']
-            print("order_data", order_data)
-            print("order_data", order_data)
-            print("order_data", order_data)
-            print("order_data", order_data)
             line_profile = LineProfile.objects.get(user=request.user)
             line_profile.phone = post_data['user_phone']
             line_profile.save()
@@ -156,18 +142,10 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 order_number = int(od['order_number'])
                 area_id = int(od['area_id'])
                 distribution_place_id = int(od['distribution_place_id'])
-                print("line_id", line_id)
-                print("bento_id", bento_id)
-                print("order_number", order_number)
-                print("area_id", area_id)
-                print("distribution_place_id", distribution_place_id)
                 #TODO: add price column
                 success = create_order(line_id, bento_id, order_number, area_id, distribution_place_id)
                 if not success: all_success=False
             
-            print("all_success", all_success)
-            print("all_success", all_success)
-            print("all_success", all_success)
             if all_success: 
                 res_message = "謝謝你選擇照顧這片土地也照顧自己，我們午餐時間見！\n若想查看或取消訂單，請直接點選'我的訂單'就可以囉！" #TODO: 回饋訂單查詢URL
             else: 
@@ -186,7 +164,7 @@ def order_list(request):
         return redirect(get_line_login_api_url(request, state, 'order', 'order_list'))
     else:
         user = request.user
-        current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
+        current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).order_by('bento__date', 'bento__bento_type__bento_type').values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
         if len(current_orders) != 0:
             df_current_orders = pd.DataFrame(current_orders)
             df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)

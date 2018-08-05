@@ -105,9 +105,9 @@ def get_order_list_reply(user):
         df_current_orders = df_current_orders[['row_id', 'id','date', 'photo', 'name','type', 'price','number','cuisine', 'today']]
         current_orders = df_current_orders.T.to_dict().values()
 
-        CarouselColumns = []
+        carousel_columns = []
         for order in current_orders:
-            ccol = CarouselColumn(
+            carousel_column = CarouselColumn(
                         thumbnail_image_url=order['photo'],
                         title=order['date'] + ' ' + order['name'],
                         text="個數: " + str(order['number']) + "個",
@@ -118,25 +118,26 @@ def get_order_list_reply(user):
                             )
                         ]
                     )
-            CarouselColumns.append(ccol)
+            carousel_columns.append(carousel_column)
 
         carousel_template_message = TemplateSendMessage(
             alt_text='近期訂單',
             template=CarouselTemplate(
-                columns=CarouselColumns
+                columns=carousel_columns
             )
         )
+        return [carousel_template_message]
 
-        buttons_template_message = TemplateSendMessage(
-            alt_text='查看訂單提醒',
-            template=ButtonsTemplate(
-                text='本頁面僅提供五筆訂單資訊，查看完整訂單資訊，請點擊下面按鈕。',
-                actions=[
-                    URITemplateAction(
-                        label='完整訂單資訊',
-                        uri=settings.DOMAIN + 'order/order_list/'
-                    )
-                ]
-            )
-        )
-        return [carousel_template_message, buttons_template_message]
+        # buttons_template_message = TemplateSendMessage(
+        #     alt_text='查看訂單提醒',
+        #     template=ButtonsTemplate(
+        #         text='本頁面僅提供五筆訂單資訊，查看完整訂單資訊，請點擊下面按鈕。',
+        #         actions=[
+        #             URITemplateAction(
+        #                 label='完整訂單資訊',
+        #                 uri=settings.DOMAIN + 'order/order_list/'
+        #             )
+        #         ]
+        #     )
+        # )
+        # return [carousel_template_message, buttons_template_message]

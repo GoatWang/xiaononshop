@@ -471,7 +471,7 @@ def _handle_unfollow_event(event):
     line_profile.save()
 
 ## handle message and event
-def _handle_text_msg(event):
+def _handle_text_msg(event, request):
     text = event.message.text
     # user_name = line_bot_api.get_profile(line_id).display_name
     line_profile = LineProfile.objects.get(line_id=event.source.user_id)
@@ -539,7 +539,7 @@ def callback(request):
                 print("MessageEvent")
                 print("MessageEvent")
                 if isinstance(event.message, TextMessage):
-                    _handle_text_msg(event)
+                    _handle_text_msg(event, request)
             #     if isinstance(event.message, LocationMessage):
             #         _handle_location_msg(event)
             if isinstance(event, FollowEvent):

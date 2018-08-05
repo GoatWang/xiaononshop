@@ -477,6 +477,12 @@ def _handle_text_msg(event, request):
     line_profile = LineProfile.objects.get(line_id=event.source.user_id)
     line_profile_state = line_profile.state
 
+    print("text", text)
+    print("text", text)
+    print("text", text)
+    print("text", text)
+    print("text", text)
+
     if text == "動作: 馬上訂購":
         messages = get_area_reply_messages()
     elif text == "動作: 本周菜色":
@@ -516,46 +522,14 @@ def _handle_postback_event(event, request):
 
 @csrf_exempt
 def callback(request):
-    print("callback")
-    print("callback")
-    print("callback")
-    print("callback")
-    print("callback")
     if request.method == 'POST':
         signature = request.META['HTTP_X_LINE_SIGNATURE']
-        print("signature", signature)
-        print("signature", signature)
-        print("signature", signature)
-        print("signature", signature)
-        print("signature", signature)
-        
         body = request.body.decode('utf-8')
-        print("body", body)
-        print("body", body)
-        print("body", body)
-        print("body", body)
-        print("body", body)
-
         try:
             events = parser.parse(body, signature)
-            print("events", events)
-            print("events", events)
-            print("events", events)
-            print("events", events)
-            print("events", events)
         except InvalidSignatureError:
-            print("InvalidSignatureError")
-            print("InvalidSignatureError")
-            print("InvalidSignatureError")
-            print("InvalidSignatureError")
-            print("InvalidSignatureError")
             return HttpResponseForbidden()
         except LineBotApiError:
-            print("LineBotApiError")
-            print("LineBotApiError")
-            print("LineBotApiError")
-            print("LineBotApiError")
-            print("LineBotApiError")
             return HttpResponseBadRequest()
 
         for event in events:

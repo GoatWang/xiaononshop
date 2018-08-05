@@ -109,8 +109,8 @@ def get_order_list_reply(user):
         for order in current_orders:
             ccol = CarouselColumn(
                         thumbnail_image_url=order['photo'],
-                        title='this is menu1',
-                        text='description1',
+                        title=order['date'] + ' ' + order['name'],
+                        text="個數: " + str(order['number']) + "個",
                         actions=[
                             PostbackTemplateAction(
                                 label='取消訂單',

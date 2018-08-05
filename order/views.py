@@ -527,17 +527,28 @@ def callback(request):
         
         try:
             events = parser.parse(body, signature)
+            print("events", events)
+            print("events", events)
+            print("events", events)
+            print("events", events)
+            print("events", events)
         except InvalidSignatureError:
+            print("InvalidSignatureError")
+            print("InvalidSignatureError")
+            print("InvalidSignatureError")
+            print("InvalidSignatureError")
+            print("InvalidSignatureError")
             return HttpResponseForbidden()
         except LineBotApiError:
+            print("LineBotApiError")
+            print("LineBotApiError")
+            print("LineBotApiError")
+            print("LineBotApiError")
+            print("LineBotApiError")
             return HttpResponseBadRequest()
 
         for event in events:
             if isinstance(event, MessageEvent):
-                print("MessageEvent")
-                print("MessageEvent")
-                print("MessageEvent")
-                print("MessageEvent")
                 if isinstance(event.message, TextMessage):
                     _handle_text_msg(event, request)
             #     if isinstance(event.message, LocationMessage):
@@ -547,10 +558,6 @@ def callback(request):
             if isinstance(event, UnfollowEvent):
                 _handle_unfollow_event(event)
             if isinstance(event, PostbackEvent):
-                print("PostbackEvent")
-                print("PostbackEvent")
-                print("PostbackEvent")
-                print("PostbackEvent")
                 _handle_postback_event(event, request)
         return HttpResponse()
     else:

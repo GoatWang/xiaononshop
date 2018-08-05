@@ -473,24 +473,17 @@ def _handle_unfollow_event(event):
 ## handle message and event
 def _handle_text_msg(event, request):
     text = event.message.text
-    print("texttexttext", text)
-    print("texttexttext", text)
-    print("texttexttext", text)
-    print("texttexttext", text)
+    user = User.objects.get(username = event.source.user_id)
     # user_name = line_bot_api.get_profile(line_id).display_name
-    line_profile = LineProfile.objects.get(line_id=event.source.user_id)
-    line_profile_state = line_profile.state
+    # line_profile = LineProfile.objects.get(line_id=event.source.user_id)
+    # line_profile_state = line_profile.state
 
     if text == "動作: 馬上訂購":
         messages = get_area_reply_messages()
-    elif text == "動作: 本周菜色":
-        print("動作: 本周菜色")
-        print("動作: 本周菜色")
-        print("動作: 本周菜色")
-        print("動作: 本周菜色")
+    elif text == "動作: 本週菜色":
         messages = [TextSendMessage(text="本功能即將推出，敬請期待!")]
     elif text == "動作: 查看訂單":
-        messages = get_order_list_reply(request)
+        messages = get_order_list_reply(user)
     else:
         messages = [TextSendMessage(text="小農聽不懂您的意思，麻煩妳連絡客服人員喔!")]
         

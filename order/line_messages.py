@@ -1,6 +1,7 @@
 from xiaonon import settings
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 from django.db.models import Sum
+import pandas as pd
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -86,8 +87,7 @@ def get_distribution_place_reply_messages(request, area_id):
 
 
 
-def get_order_list_reply(request):
-    user = request.user
+def get_order_list_reply(user):
     current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__photo', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date')[:5])
     if len(current_orders) == 0:
         messages = [TextSendMessage(text="您近期還沒有新的訂單喔~")]

@@ -30,7 +30,7 @@ from linebot.models import (
 )
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
-from order.line_messages import get_area_reply_messages, get_distribution_place_reply_messages
+from order.line_messages import get_area_reply_messages, get_distribution_place_reply_messages, get_order_list_reply
 
 # ------------------------following are website----------------------------------------------
 def index(request):

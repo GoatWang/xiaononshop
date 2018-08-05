@@ -88,21 +88,18 @@ def get_distribution_place_reply_messages(request, area_id):
 
 
 def get_order_list_reply(user):
-    current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'price', 'bento__date', 'bento__photo', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date')[:5])
+    current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'bento__date', 'bento__photo', 'bento__name', 'distribution_place__distribution_place', named=True).order_by('bento__date')[:5])
     if len(current_orders) == 0:
         messages = [TextSendMessage(text="您近期還沒有新的訂單喔~")]
         return messages
     else:
         df_current_orders = pd.DataFrame(current_orders)
-        df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
         df_current_orders['date'] = df_current_orders['bento__date'].apply(lambda x:str(x.month) + '/' + str(x.day))
         df_current_orders['photo'] = df_current_orders['bento__photo']
         df_current_orders['name'] = df_current_orders['bento__name']
-        df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
         df_current_orders['number'] = df_current_orders['number']
-        df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
-        df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==datetime.now().date())
-        df_current_orders = df_current_orders[['row_id', 'id','date', 'photo', 'name','type', 'price','number','cuisine', 'today']]
+        df_current_orders['distribution_place'] = df_current_orders['distribution_place__distribution_place']
+        df_current_orders = df_current_orders[['id','date', 'photo', 'name','number']]
         current_orders = list(df_current_orders.T.to_dict().values())
 
         carousel_columns = []
@@ -110,7 +107,7 @@ def get_order_list_reply(user):
             carousel_column = CarouselColumn(
                         thumbnail_image_url='https://s3-ap-southeast-1.amazonaws.com/ogbento/' + str(order['photo']),
                         title=order['date'] + ' ' + order['name'],
-                        text="個數: " + str(order['number']) + "個",
+                        text="個數: " + str(order['number']) + "個\n取餐地點: " + order['distribution_place'],
                         actions=[
                             PostbackTemplateAction(
                                 label='取消訂單',

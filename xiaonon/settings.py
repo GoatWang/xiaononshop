@@ -45,7 +45,14 @@ SECRET_KEY = '1v^q654^2@l1k%t0^wgy1c3_$o)0+fjsxhzcj!qb%l-y6d9(+s'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['xiaonon.herokuapp.com', 'xiaononshop.com', 'xiaonon-dev.us-east-1.elasticbeanstalk.com', 'ogbento-dev.ap-southeast-1.elasticbeanstalk.com', '127.0.0.1']
+ALLOWED_HOSTS = [
+    'xiaonon.herokuapp.com', 
+    'xiaononshop.com', 
+    'xiaonon-dev.us-east-1.elasticbeanstalk.com', 
+    'ogbento-dev.ap-southeast-1.elasticbeanstalk.com', 
+    '127.0.0.1',
+    'api.rqa.recorder.duapps.com'
+    ]
 
 
 # Application definition

@@ -199,6 +199,7 @@
         }
         else
         {
+            alert(JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val())
             $.ajax({
                 type: 'POST',
                 url: '/order/order_create/',

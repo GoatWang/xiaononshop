@@ -131,6 +131,8 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 }
                 return render(request, 'order/order_create.html', context)
         if request.method == "POST":
+            print('request.method == "POST"', request.method == "POST")
+            print('request.method == "POST"', request.method == "POST")
             post_data = request.POST
             order_data = post_data['orderData']
             print("order_data", order_data)

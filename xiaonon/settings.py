@@ -51,7 +51,7 @@ ALLOWED_HOSTS = [
     'xiaonon-dev.us-east-1.elasticbeanstalk.com', 
     'ogbento-dev.ap-southeast-1.elasticbeanstalk.com', 
     '127.0.0.1',
-    'api.rqa.recorder.duapps.com'
+    # 'api.rqa.recorder.duapps.com'
     ]
 
 

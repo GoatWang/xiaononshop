@@ -203,7 +203,7 @@
             alert($("#userPhoneInput").val())
             $.ajax({
                 type: 'POST',
-                url: '/order/order_create/',
+                url: '{% url "order:order_create" %}',
                 data: {"orderData":JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val()},
                 dataType: 'json',
                 success: function (data) {

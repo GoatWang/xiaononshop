@@ -516,6 +516,11 @@ def _handle_postback_event(event, request):
 
 @csrf_exempt
 def callback(request):
+    print("callback")
+    print("callback")
+    print("callback")
+    print("callback")
+    print("callback")
     if request.method == 'POST':
         signature = request.META['HTTP_X_LINE_SIGNATURE']
         body = request.body.decode('utf-8')
@@ -529,6 +534,10 @@ def callback(request):
 
         for event in events:
             if isinstance(event, MessageEvent):
+                print("MessageEvent")
+                print("MessageEvent")
+                print("MessageEvent")
+                print("MessageEvent")
                 if isinstance(event.message, TextMessage):
                     _handle_text_msg(event)
             #     if isinstance(event.message, LocationMessage):
@@ -538,6 +547,10 @@ def callback(request):
             if isinstance(event, UnfollowEvent):
                 _handle_unfollow_event(event)
             if isinstance(event, PostbackEvent):
+                print("PostbackEvent")
+                print("PostbackEvent")
+                print("PostbackEvent")
+                print("PostbackEvent")
                 _handle_postback_event(event, request)
         return HttpResponse()
     else:

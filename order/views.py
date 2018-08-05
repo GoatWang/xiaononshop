@@ -483,7 +483,16 @@ def _handle_text_msg(event, request):
     elif text == "動作: 本週菜色":
         messages = [TextSendMessage(text="本功能即將推出，敬請期待!")]
     elif text == "動作: 查看訂單":
+        print("動作: 查看訂單")
+        print("動作: 查看訂單")
+        print("動作: 查看訂單")
         messages = get_order_list_reply(user)
+
+        print("len(messages)", len(messages))
+        print("len(messages)", len(messages))
+        print("len(messages)", len(messages))
+        print("len(messages)", len(messages))
+        print("len(messages)", len(messages))
     else:
         messages = [TextSendMessage(text="小農聽不懂您的意思，麻煩妳連絡客服人員喔!")]
         

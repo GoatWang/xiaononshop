@@ -98,7 +98,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                         adp_dict['selected'] = False
                     output_adps.append(adp_dict)
 
-            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).order_by('bento__date', 'bento__bento_type__bento_type').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
             if len(available_bentos) == 0:
                 message = "目前沒有便當供應，請開學後再來找我喔。"
                 context = {
@@ -123,7 +123,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                 df_available_bentos['select_range'] = df_available_bentos['remain'].apply(lambda x:list(range(0, 11)) if int(x)>=10 else list(range(0, int(x)+1)))
 
                 df_available_bentos = df_available_bentos[["id", "name", 'date', "bento_type", "cuisine", "photo", "price", "remain", "select_range"]]
-                df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
+                # df_available_bentos = df_available_bentos.sort_values(by=['date', 'bento_type'])
                 print("df_available_bentos['date']", df_available_bentos['date'])
                 print("df_available_bentos['bento_type']", df_available_bentos['bento_type'])
                 available_bentos = df_available_bentos.T.to_dict().values()

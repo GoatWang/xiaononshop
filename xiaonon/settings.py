@@ -187,6 +187,7 @@ LINE_LOGIN_CHANNEL_ID = pwddata['LINE_LOGIN_CHANNEL_ID']
 LINE_LOGIN_CHANNEL_SECRET = pwddata['LINE_LOGIN_CHANNEL_SECRET']
 
 DOMAIN = 'https://xiaononshop.com/'
+AWS_BENTO_IMG_URL = "https://s3-ap-southeast-1.amazonaws.com/ogbento/"
 
 
 

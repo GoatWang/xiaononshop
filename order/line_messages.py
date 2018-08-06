@@ -141,7 +141,7 @@ def get_order_list_reply(user):
 
 
 def get_weekly_bentos_reply():
-    available_bentos = AreaLimitation.objects.filter(bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).values('bento__id').annotate(total_remain=Sum('remain')).order_by('bento__id', 'bento__bento_type__bento_type').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'total_remain')
+    available_bentos = AreaLimitation.objects.filter(bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).values('bento__id').annotate(total_remain=Sum('remain')).order_by('bento__date', 'bento__bento_type__bento_type').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'total_remain')
     if len(available_bentos) == 0:
         messages = [TextSendMessage(text="目前沒有便當供應，請開學後再來找我喔。")]
         return messages

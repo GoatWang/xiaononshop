@@ -157,7 +157,7 @@ def get_weekly_bentos_reply():
         df_available_bentos['remain'] = df_available_bentos['total_remain'].astype(str)
 
         df_available_bentos = df_available_bentos[[ "id", "name", "date", "bento_type", "cuisine", "photo", "price", "remain"]]
-        available_bentos = df_available_bentos.T.to_dict().values()
+        available_bentos = list(df_available_bentos.T.to_dict().values())
 
 
         messages = []
@@ -177,14 +177,15 @@ def get_weekly_bentos_reply():
                         )
                 carousel_columns.append(carousel_column)
 
-            carousel_template_message = TemplateSendMessage(
-                alt_text='本週菜單',
-                template=CarouselTemplate(
-                    columns=carousel_columns
+            if len(carousel_columns) != 0:
+                carousel_template_message = TemplateSendMessage(
+                    alt_text='本週菜單',
+                    template=CarouselTemplate(
+                        columns=carousel_columns
+                    )
                 )
-            )
-            messages.append(carousel_template_message)
+                messages.append(carousel_template_message)
 
-        messages.append(TextSendMessage(text=settings.AWS_BENTO_IMG_URL + str(bento['photo'])))
+        messages.append(TextSendMessage(text=settings.AWS_BENTO_IMG_URL + str(available_bentos[0]['photo'])))
         return messages
 

@@ -30,7 +30,7 @@ from linebot.models import (
 )
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
-from order.line_messages import get_area_reply_messages, get_distribution_place_reply_messages, get_order_list_reply
+from order.line_messages import get_area_reply_messages, get_distribution_place_reply_messages, get_order_list_reply, get_weekly_bentos_reply
 
 # ------------------------following are website----------------------------------------------
 def index(request):
@@ -480,8 +480,8 @@ def _handle_text_msg(event, request):
     if text == "動作: 馬上訂購":
         messages = get_area_reply_messages()
     elif text == "動作: 本週菜色":
-
-        messages = [TextSendMessage(text="本功能即將推出，敬請期待!")]
+        messages = get_weekly_bentos_reply()
+        # messages = [TextSendMessage(text="本功能即將推出，敬請期待!")]
     elif text == "動作: 查看訂單":
         messages = get_order_list_reply(user)
     else:

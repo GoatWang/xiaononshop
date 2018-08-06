@@ -185,7 +185,5 @@ def get_weekly_bentos_reply():
                     )
                 )
                 messages.append(carousel_template_message)
-
-        messages.append(TextSendMessage(text=settings.AWS_BENTO_IMG_URL + str(available_bentos[0]['photo'])))
         return messages
 

@@ -141,7 +141,7 @@ def get_order_list_reply(user):
 
 
 def get_weekly_bentos_reply():
-    available_bentos = AreaLimitation.objects.filter(bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).values('bento__id').annotate(total_remain=Sum('remain')).values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'total_remain')
+    available_bentos = AreaLimitation.objects.filter(bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).values('bento__id').annotate(total_remain=Sum('remain')).order_by('bento__id', 'bento__bento_type__bento_type').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'total_remain')
     if len(available_bentos) == 0:
         messages = [TextSendMessage(text="目前沒有便當供應，請開學後再來找我喔。")]
         return messages
@@ -163,7 +163,7 @@ def get_weekly_bentos_reply():
         messages = []
         for i in range(2):
             carousel_columns = []
-            for bento in available_bentos[i:(i+1)*5]:
+            for bento in available_bentos[i*5:(i+1)*5]:
                 carousel_column = CarouselColumn(
                             thumbnail_image_url=settings.AWS_BENTO_IMG_URL + str(bento['photo']),
                             title=bento['date'] + ' ' + bento['name'] + "(剩" + str(bento['remain']) + "個)",

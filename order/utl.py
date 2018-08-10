@@ -113,3 +113,7 @@ def delete_order(order_id, line_id):
     return message
 
 
+def get_taiwan_current_datetime():
+    return datetime.utcnow() + (datetime(2005,1,1,8) - datetime(2005,1,1,0))
+
+

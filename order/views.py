@@ -16,7 +16,7 @@ from xiaonon import settings
 from django.contrib.auth.models import User
 from django.contrib import auth
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
-from order.utl import get_order_detail, parse_url_query_string, create_order, get_redirect_url, get_line_login_api_url, delete_order
+from order.utl import get_order_detail, parse_url_query_string, create_order, get_redirect_url, get_line_login_api_url, delete_order, get_taiwan_current_datetime
 
 from linebot import LineBotApi, WebhookParser ##, WebhookHanlder
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -93,7 +93,7 @@ def order_create(request, area_id=1, distribution_place_id=1):
                         adp_dict['selected'] = False
                     output_adps.append(adp_dict)
 
-            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).order_by('bento__date', 'bento__bento_type__bento_type').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
+            available_bentos = AreaLimitation.objects.filter(area=area_id, bento__date__gt=get_taiwan_current_datetime(), bento__date__lte=get_taiwan_current_datetime()+timedelta(5), bento__ready=True).order_by('bento__date', 'bento__bento_type__bento_type').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'remain')
             if len(available_bentos) == 0:
                 message = "目前沒有便當供應，請開學後再來找我喔。"
                 context = {
@@ -164,7 +164,7 @@ def order_list(request):
         return redirect(get_line_login_api_url(request, state, 'order', 'order_list'))
     else:
         user = request.user
-        current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).order_by('bento__date', 'bento__bento_type__bento_type').values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
+        current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=get_taiwan_current_datetime()-timedelta(1)).order_by('bento__date', 'bento__bento_type__bento_type').values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date'))
         if len(current_orders) != 0:
             df_current_orders = pd.DataFrame(current_orders)
             df_current_orders['row_id'] = pd.Series(df_current_orders.index).apply(lambda x:x+1)
@@ -173,13 +173,13 @@ def order_list(request):
             df_current_orders['type'] = df_current_orders['bento__bento_type__bento_type']
             df_current_orders['number'] = df_current_orders['number']
             df_current_orders['cuisine'] = df_current_orders['bento__cuisine']
-            df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==datetime.now().date())
+            df_current_orders['today'] = df_current_orders['bento__date'].apply(lambda x:x==get_taiwan_current_datetime().date())
             df_current_orders = df_current_orders[['row_id', 'id','date','name','type', 'price','number','cuisine', 'today']]
             current_orders = df_current_orders.T.to_dict().values()
         else:
             current_orders = []
             
-        history_orders = list(Order.objects.filter(line_profile__user=user, bento__date__lt=datetime.now()).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date').reverse()[:10])
+        history_orders = list(Order.objects.filter(line_profile__user=user, bento__date__lt=get_taiwan_current_datetime()).values_list('id', 'number', 'price', 'bento__date', 'bento__name', 'bento__bento_type__bento_type', 'bento__cuisine', named=True).order_by('bento__date').reverse()[:10])
         if len(history_orders) != 0:
             df_history_orders = pd.DataFrame(history_orders)
             df_history_orders['row_id'] = pd.Series(df_history_orders.index).apply(lambda x:x+1)
@@ -214,7 +214,7 @@ def order_delete(request, order_id):
 def backend_main_view(request):
     if not request.user.is_authenticated:
         state =  uuid4().hex
-        return redirect(get_line_login_api_url(request, state, 'order', 'backend_friend_list'))
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_main_view'))
     else:
         if not request.user.is_staff:
             context = {
@@ -344,7 +344,7 @@ def backend_daily_output_order(request, area_id):
                 }
             return render(request, 'order/message.html', context)
         else:
-            order_list = Order.objects.filter(bento__date=datetime.now(), area=area_id, delete_time=None).values_list('id', "line_profile__line_id", 'line_profile__line_name', 'line_profile__phone', 'bento__name', 'area__area', 'distribution_place__distribution_place', 'number', 'price', 'received', named=True).order_by("line_profile__line_name", "distribution_place__distribution_place", "bento__name")
+            order_list = Order.objects.filter(bento__date=get_taiwan_current_datetime(), area=area_id, delete_time=None).values_list('id', "line_profile__line_id", 'line_profile__line_name', 'line_profile__phone', 'bento__name', 'area__area', 'distribution_place__distribution_place', 'number', 'price', 'received', named=True).order_by("line_profile__line_name", "distribution_place__distribution_place", "bento__name")
             if order_list.count() != 0:
                 df_order_list = pd.DataFrame(list(order_list))
                 df_order_list['order_id'] = df_order_list['id']
@@ -408,7 +408,7 @@ def beckend_daily_ouput_stats(request):
                 }
             return render(request, 'order/message.html', context)
         else:
-            order_list_groupby_area = Order.objects.filter(bento__date=datetime.now().date()).values_list('bento__name', 'bento__bento_type__bento_type', 'area__area', 'number', named=True).order_by('area__id', 'bento__bento_type__bento_type')
+            order_list_groupby_area = Order.objects.filter(bento__date=get_taiwan_current_datetime().date()).values_list('bento__name', 'bento__bento_type__bento_type', 'area__area', 'number', named=True).order_by('area__id', 'bento__bento_type__bento_type')
             df_order_list_groupby_area = pd.DataFrame(list(order_list_groupby_area))
             df_order_list_groupby_area['area'] = df_order_list_groupby_area['area__area']
             df_order_list_groupby_area['bento_name'] = df_order_list_groupby_area['bento__name']
@@ -416,19 +416,34 @@ def beckend_daily_ouput_stats(request):
             df_order_list_groupby_area = df_order_list_groupby_area.groupby(['area', 'bento_type', 'bento_name']).sum().reset_index()[['area', 'bento_type', 'bento_name', 'number']]
             order_list_groupby_area = list(df_order_list_groupby_area.T.to_dict().values()).copy()
 
-            order_list_groupby_distribution_place = Order.objects.filter(bento__date=datetime.now().date()).values_list('bento__name', 'bento__bento_type__bento_type', 'area__area', 'distribution_place__distribution_place', 'number', named=True).order_by('area__id',  'distribution_place__distribution_place', 'bento__bento_type__bento_type')
+            order_list_groupby_distribution_place = Order.objects.filter(bento__date=get_taiwan_current_datetime().date()).values_list('bento__name', 'bento__bento_type__bento_type', 'area__area', 'distribution_place__distribution_place', 'number', named=True).order_by('area__id',  'distribution_place__distribution_place', 'bento__bento_type__bento_type')
             df_order_list_groupby_distribution_place = pd.DataFrame(list(order_list_groupby_distribution_place))
             df_order_list_groupby_distribution_place['area'] = df_order_list_groupby_distribution_place['area__area']
             df_order_list_groupby_distribution_place['distribution_place'] = df_order_list_groupby_distribution_place['distribution_place__distribution_place']
             df_order_list_groupby_distribution_place['bento_name'] = df_order_list_groupby_distribution_place['bento__name']
             df_order_list_groupby_distribution_place['bento_type'] = df_order_list_groupby_distribution_place['bento__bento_type__bento_type']
             df_order_list_groupby_distribution_place = df_order_list_groupby_distribution_place.groupby(['area', 'distribution_place', 'bento_type', 'bento_name']).sum().reset_index()[['area', 'distribution_place', 'bento_type', 'bento_name', 'number']]
+            table_html = df_order_list_groupby_distribution_place.to_html()
             order_list_groupby_distribution_place = list(df_order_list_groupby_distribution_place.T.to_dict().values()).copy()
-
+            
+            
+            # order_list_groupped_table = []
+            # all_area = Area.objects.all()
+            # for area in all_area:
+            #     area_order = {}
+            #     area_order['area'] = area.area
+            #     area_order['distribution_places'] = []
+            #     distribution_places = DistributionPlace.objects.filter(area=area)
+            #     for ds in distribution_places:
+            #         orders = Order.objects.filter(bento__date=get_taiwan_current_datetime().date(), distribution_place=ds).values_list('bento__name', 'bento__bento_type__bento_type', 'number', named=True).order_by('bento__bento_type__bento_type')
+            #         area_order['distribution_places'] = orders
+            
             context ={
                 "title": "當日出貨統計",
                 "order_list_groupby_area":order_list_groupby_area,
-                "order_list_groupby_distribution_place":order_list_groupby_distribution_place
+                "order_list_groupby_distribution_place":order_list_groupby_distribution_place,
+                'table_html':table_html
+
             }
             return render(request, 'order/beckend_daily_ouput_stats.html', context)
                    

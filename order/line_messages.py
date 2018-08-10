@@ -17,7 +17,7 @@ line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parser = WebhookParser(settings.LINE_CHANNEL_SECRET)
 
 from datetime import datetime, timedelta
-from order.utl import weekday_zh_mapping, college_simplify_mapping, date_to_zh_string, date_to_url_string, url_string_to_date, get_order_detail, get_redirect_url
+from order.utl import weekday_zh_mapping, college_simplify_mapping, date_to_zh_string, date_to_url_string, url_string_to_date, get_order_detail, get_redirect_url, get_taiwan_current_datetime
 
 def get_area_reply_messages():
     areas = Area.objects.all()
@@ -31,7 +31,7 @@ def get_area_reply_messages():
     for message_with_btns in messages_with_btns:
         actions = []
         for btn in message_with_btns:
-            remain = sum(AreaLimitation.objects.filter(area=btn, bento__date__gt=datetime.now().date(), bento__date__lte=datetime.now()+timedelta(5)).values_list('remain', flat=True))
+            remain = sum(AreaLimitation.objects.filter(area=btn, bento__date__gt=get_taiwan_current_datetime().date(), bento__date__lte=get_taiwan_current_datetime()+timedelta(5)).values_list('remain', flat=True))
             label = btn.area+"(餘"+ str(remain) +"個)" if remain < 20 else btn.area
             actions.append(
                     PostbackTemplateAction(
@@ -88,7 +88,7 @@ def get_distribution_place_reply_messages(request, area_id):
 
 
 def get_order_list_reply(user):
-    current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=datetime.now()-timedelta(1)).values_list('id', 'number', 'bento__date', 'bento__photo', 'bento__name', 'distribution_place__distribution_place', named=True).order_by('bento__date')[:5])
+    current_orders = list(Order.objects.filter(line_profile__user=user, delete_time=None, bento__date__gt=get_taiwan_current_datetime()-timedelta(1)).values_list('id', 'number', 'bento__date', 'bento__photo', 'bento__name', 'distribution_place__distribution_place', named=True).order_by('bento__date')[:5])
     if len(current_orders) == 0:
         messages = [TextSendMessage(text="您近期還沒有新的訂單喔~")]
         return messages
@@ -141,7 +141,7 @@ def get_order_list_reply(user):
 
 
 def get_weekly_bentos_reply():
-    available_bentos = AreaLimitation.objects.filter(bento__date__gt=datetime.now(), bento__date__lte=datetime.now()+timedelta(5), bento__ready=True).values('bento__id').annotate(total_remain=Sum('remain')).order_by('bento__date', 'bento__bento_type__bento_type').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'total_remain')
+    available_bentos = AreaLimitation.objects.filter(bento__date__gt=get_taiwan_current_datetime(), bento__date__lte=get_taiwan_current_datetime()+timedelta(5), bento__ready=True).values('bento__id').annotate(total_remain=Sum('remain')).order_by('bento__date', 'bento__bento_type__bento_type').values('bento__id', 'bento__name', 'bento__date', 'bento__bento_type__bento_type', 'bento__cuisine', 'bento__photo', 'bento__price', 'total_remain')
     if len(available_bentos) == 0:
         messages = [TextSendMessage(text="目前沒有便當供應，請開學後再來找我喔。")]
         return messages

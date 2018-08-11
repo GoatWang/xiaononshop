@@ -380,7 +380,7 @@ def backend_daily_output_order(request, area_id):
             }
         return render(request, 'order/backend_daily_output_order.html', context)
 
-def beckend_receive_order(request, order_id):
+def backend_receive_order(request, order_id):
     if not request.user.is_authenticated:
         state =  uuid4().hex
         return redirect(get_line_login_api_url(request, state, 'order', 'backend_main_view'))
@@ -397,7 +397,7 @@ def beckend_receive_order(request, order_id):
             order.save()
             return JsonResponse({"message":"Success"})
 
-def beckend_daily_ouput_stats(request):
+def backend_daily_ouput_stats(request):
     if not request.user.is_authenticated:
         state =  uuid4().hex
         return redirect(get_line_login_api_url(request, state, 'order', 'backend_main_view'))
@@ -419,8 +419,58 @@ def beckend_daily_ouput_stats(request):
                 for dp in distribution_places:
                     distribution_place_order = {}
                     distribution_place_order['distribution_place'] = dp.distribution_place
-                    #TODO 
-                    # orders = Order.objects.filter(bento__date=get_taiwan_current_datetime().date(), distribution_place=dp).values_list('bento__name', 'bento__bento_type__bento_type', 'number', named=True).order_by('bento__bento_type__bento_type')
+                    searching_date = get_taiwan_current_datetime().date()
+                    print(searching_date)
+                    orders = Order.objects.filter(bento__date=searching_date, distribution_place=dp, delete_time=None).values_list('bento__id', 'bento__name', 'bento__bento_type__bento_type', 'number', named=True).order_by('bento__bento_type__bento_type')
+                    print(orders)
+                    if len(orders) != 0:
+                        df_orders = pd.DataFrame(list(orders))
+                        df_orders['bento_id'] = df_orders['bento__id']
+                        df_orders['bento_name'] = df_orders['bento__name']
+                        df_orders['bento_type'] = df_orders['bento__bento_type__bento_type']
+                        df_orders_groupped = df_orders.groupby(['bento_name', 'bento_id', 'bento_type']).sum().reset_index()
+                        def combine_area_limitation(row):
+                            al = AreaLimitation.objects.get(bento=row['bento_id'], area=area)
+                            row['limitation'] = al.limitation
+                            row['remain'] = al.remain
+                            return row
+                        df_orders_groupped = df_orders_groupped.apply(combine_area_limitation, axis=1)[['bento_name', 'bento_id', 'bento_type', 'number', 'limitation', 'remain']]
+                        print(df_orders_groupped)
+                        distribution_place_order['order_list'] = list(df_orders_groupped.T.to_dict().values())
+                    else:
+                        distribution_place_order['order_list'] = []
+                    area_order['distribution_place_order'].append(distribution_place_order)
+                order_list_groupped_table.append(area_order)
+            context ={
+                "title": "當日出貨統計",
+                # "order_list_groupby_area":order_list_groupby_area,
+                # "order_list_groupby_distribution_place":order_list_groupby_distribution_place,
+                "order_list_groupped_table" : order_list_groupped_table,
+            }
+            return render(request, 'order/backend_daily_ouput_stats.html', context)
+                   
+def backend_tomorrow_ouput_stats(request):
+    if not request.user.is_authenticated:
+        state =  uuid4().hex
+        return redirect(get_line_login_api_url(request, state, 'order', 'backend_main_view'))
+    else:
+        if not request.user.is_superuser:
+            context = {
+                "title":"您沒有查閱權限",
+                "message": "此頁面必須具有管理員身分方能查閱。"
+                }
+            return render(request, 'order/message.html', context)
+        else:
+            order_list_groupped_table = []
+            all_area = Area.objects.all()
+            for area in all_area:
+                area_order = {}
+                area_order['area'] = area.area
+                area_order['distribution_place_order'] = []
+                distribution_places = DistributionPlace.objects.filter(area=area)
+                for dp in distribution_places:
+                    distribution_place_order = {}
+                    distribution_place_order['distribution_place'] = dp.distribution_place
                     searching_date = get_taiwan_current_datetime().date()+timedelta(1)
                     print(searching_date)
                     orders = Order.objects.filter(bento__date=searching_date, distribution_place=dp, delete_time=None).values_list('bento__id', 'bento__name', 'bento__bento_type__bento_type', 'number', named=True).order_by('bento__bento_type__bento_type')
@@ -449,9 +499,8 @@ def beckend_daily_ouput_stats(request):
                 # "order_list_groupby_distribution_place":order_list_groupby_distribution_place,
                 "order_list_groupped_table" : order_list_groupped_table,
             }
-            return render(request, 'order/beckend_daily_ouput_stats.html', context)
+            return render(request, 'order/backend_daily_ouput_stats.html', context)
                    
-
 # ------------------------following are line bot---------------------------------------------
 
 def _handle_follow_event(event):

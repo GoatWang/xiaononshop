@@ -166,14 +166,12 @@
         $("#priceTotalLabel font").text(sumOfSubtotals.toString())
     })
 
-
     $("#submitBtn").click(function(){
         $('body').css('cursor','wait');
-        
         orderData = []
         currentUrl = window.location.href 
-        area_id = !isNaN(currentUrl.split()[5]) ? currentUrl.split()[5]:1
-        distribution_place_id = !isNaN(currentUrl.split()[6]) ? currentUrl.split()[6]:1
+        area_id = !isNaN(currentUrl.split("/")[5]) ? currentUrl.split("/")[5]:1
+        distribution_place_id = !isNaN(currentUrl.split("/")[6]) ? currentUrl.split("/")[6]:1
         $(".card").each(function(){
             //TODO: record price column
             id = $(this).find(".idP").text()
@@ -199,36 +197,37 @@
         }
         else
         {
-            $.ajax({
-                type: 'POST',
-                url: '{% url "order:order_create" %}',
-                data: {"orderData":JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val()},
-                async : false,  
-                dataType: 'json',
-                success: function (data) {
-                    alert("訂購成功!")
-                },
-                error: function (jqXHR, exception) {
-                    var msg = '';
-                    if (jqXHR.status === 0) {
-                        msg = 'Not connect.\n Verify Network.';
-                    } else if (jqXHR.status == 404) {
-                        msg = 'Requested page not found. [404]';
-                    } else if (jqXHR.status == 500) {
-                        msg = 'Internal Server Error [500].';
-                    } else if (exception === 'parsererror') {
-                        msg = 'Requested JSON parse failed.';
-                    } else if (exception === 'timeout') {
-                        msg = 'Time out error.';
-                    } else if (exception === 'abort') {
-                        msg = 'Ajax request aborted.';
-                    } else {
-                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
-                    }
-                    alert("訂購失敗 "+msg)
-                },
-            });
-            window.location = "{% url 'order:order_list' %}";
+            console.log({"orderData":JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val()})
+//            $.ajax({
+//                type: 'POST',
+//                url: '{% url "order:order_create" %}',
+//                data: {"orderData":JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val()},
+//                async : false,  
+//                dataType: 'json',
+//                success: function (data) {
+//                    alert("訂購成功!")
+//                },
+//                error: function (jqXHR, exception) {
+//                    var msg = '';
+//                    if (jqXHR.status === 0) {
+//                        msg = 'Not connect.\n Verify Network.';
+//                    } else if (jqXHR.status == 404) {
+//                        msg = 'Requested page not found. [404]';
+//                    } else if (jqXHR.status == 500) {
+//                        msg = 'Internal Server Error [500].';
+//                    } else if (exception === 'parsererror') {
+//                        msg = 'Requested JSON parse failed.';
+//                    } else if (exception === 'timeout') {
+//                        msg = 'Time out error.';
+//                    } else if (exception === 'abort') {
+//                        msg = 'Ajax request aborted.';
+//                    } else {
+//                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
+//                    }
+//                    alert("訂購失敗 "+msg)
+//                },
+//            });
+//            window.location = "{% url 'order:order_list' %}";
         }
         $('body').css('cursor','auto');
     })

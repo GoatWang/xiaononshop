@@ -46,6 +46,7 @@ SECRET_KEY = '1v^q654^2@l1k%t0^wgy1c3_$o)0+fjsxhzcj!qb%l-y6d9(+s'
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'localhost'
     'xiaonon.herokuapp.com', 
     'xiaononshop.com', 
     'xiaonon-dev.us-east-1.elasticbeanstalk.com', 

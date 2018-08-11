@@ -8,66 +8,54 @@
 
 {% block styles %}
 <style>
+    h5{
+        margin-left: 30px;
+    }
+    table{
+        margin-left: 50px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <h2>{{ title }}</h2>
 
-<h4>依學校統計</h4>
+
+{% for area_orders in order_list_groupped_table%}
+<h4>{{ area_orders.area }}</h4>
 <div class="row">
+    {% for dpo in area_orders.distribution_place_order %}
+    <h5>{{ dpo.distribution_place }}</h5>
     <table  class="table">
         <thead>
             <tr>
-                <th>學校</th>
                 <th>類型</th>
                 <th>便當</th>
-                <th>個數</th>
+                <th>已訂</th>
+                <th>現場</th>
+                <th>總共</th>
             </tr>
         </thead>
         <tbody>
-            {% for order in order_list_groupby_area %}
-            <tr>
-                <td>{{ order.area }}</td>
-                <td>{{ order.bento_name }}</td>
-                <td>{{ order.bento_type }}</td>
-                <td>{{ order.number }}</td>
-            </tr>
-            {% endfor %}
+        {% for ol in dpo.order_list %}
+        <tr>
+            <td>{{ ol.bento_name }}</td>
+            <td>{{ ol.bento_type }}</td>
+            <td>{{ ol.number }}</td>
+            <td>{{ ol.remain }}</td>
+            <td>{{ ol.limitation }}</td>
+        </tr>
+        {% endfor %}
         </tbody>
     </table>
+    {% endfor %}
 </div>
+{% endfor %}
 
 
-<h4>依地區統計</h4>
-<div class="row">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>學校</th>
-                <th>地點</th>
-                <th>類型</th>
-                <th>便當</th>
-                <th>個數</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in order_list_groupby_distribution_place %}
-            <tr>
-                <td>{{ order.area }}</td>
-                <td>{{ order.distribution_place }}</td>
-                <td>{{ order.bento_name }}</td>
-                <td>{{ order.bento_type }}</td>
-                <td>{{ order.number }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
 
-<div class="row">
-    {{ table_html |safe }}
-</div>
+
+
 
 
 {% endblock %}

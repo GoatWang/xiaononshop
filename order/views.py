@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from xiaonon import settings
 from django.contrib.auth.models import User
 from django.contrib import auth
+from django.db.models import Sum
 from order.models import Job, LineProfile, BentoType, Bento, Area, DistributionPlace, AreaLimitation, Order
 from order.utl import get_order_detail, parse_url_query_string, create_order, get_redirect_url, get_line_login_api_url, delete_order, get_taiwan_current_datetime
 
@@ -408,42 +409,45 @@ def beckend_daily_ouput_stats(request):
                 }
             return render(request, 'order/message.html', context)
         else:
-            order_list_groupby_area = Order.objects.filter(bento__date=get_taiwan_current_datetime().date()).values_list('bento__name', 'bento__bento_type__bento_type', 'area__area', 'number', named=True).order_by('area__id', 'bento__bento_type__bento_type')
-            df_order_list_groupby_area = pd.DataFrame(list(order_list_groupby_area))
-            df_order_list_groupby_area['area'] = df_order_list_groupby_area['area__area']
-            df_order_list_groupby_area['bento_name'] = df_order_list_groupby_area['bento__name']
-            df_order_list_groupby_area['bento_type'] = df_order_list_groupby_area['bento__bento_type__bento_type']
-            df_order_list_groupby_area = df_order_list_groupby_area.groupby(['area', 'bento_type', 'bento_name']).sum().reset_index()[['area', 'bento_type', 'bento_name', 'number']]
-            order_list_groupby_area = list(df_order_list_groupby_area.T.to_dict().values()).copy()
-
-            order_list_groupby_distribution_place = Order.objects.filter(bento__date=get_taiwan_current_datetime().date()).values_list('bento__name', 'bento__bento_type__bento_type', 'area__area', 'distribution_place__distribution_place', 'number', named=True).order_by('area__id',  'distribution_place__distribution_place', 'bento__bento_type__bento_type')
-            df_order_list_groupby_distribution_place = pd.DataFrame(list(order_list_groupby_distribution_place))
-            df_order_list_groupby_distribution_place['area'] = df_order_list_groupby_distribution_place['area__area']
-            df_order_list_groupby_distribution_place['distribution_place'] = df_order_list_groupby_distribution_place['distribution_place__distribution_place']
-            df_order_list_groupby_distribution_place['bento_name'] = df_order_list_groupby_distribution_place['bento__name']
-            df_order_list_groupby_distribution_place['bento_type'] = df_order_list_groupby_distribution_place['bento__bento_type__bento_type']
-            df_order_list_groupby_distribution_place = df_order_list_groupby_distribution_place.groupby(['area', 'distribution_place', 'bento_type', 'bento_name']).sum().reset_index()[['area', 'distribution_place', 'bento_type', 'bento_name', 'number']]
-            table_html = df_order_list_groupby_distribution_place.to_html()
-            order_list_groupby_distribution_place = list(df_order_list_groupby_distribution_place.T.to_dict().values()).copy()
-            
-            
-            # order_list_groupped_table = []
-            # all_area = Area.objects.all()
-            # for area in all_area:
-            #     area_order = {}
-            #     area_order['area'] = area.area
-            #     area_order['distribution_places'] = []
-            #     distribution_places = DistributionPlace.objects.filter(area=area)
-            #     for ds in distribution_places:
-            #         orders = Order.objects.filter(bento__date=get_taiwan_current_datetime().date(), distribution_place=ds).values_list('bento__name', 'bento__bento_type__bento_type', 'number', named=True).order_by('bento__bento_type__bento_type')
-            #         area_order['distribution_places'] = orders
-            
+            order_list_groupped_table = []
+            all_area = Area.objects.all()
+            for area in all_area:
+                area_order = {}
+                area_order['area'] = area.area
+                area_order['distribution_place_order'] = []
+                distribution_places = DistributionPlace.objects.filter(area=area)
+                for dp in distribution_places:
+                    distribution_place_order = {}
+                    distribution_place_order['distribution_place'] = dp.distribution_place
+                    #TODO 
+                    # orders = Order.objects.filter(bento__date=get_taiwan_current_datetime().date(), distribution_place=dp).values_list('bento__name', 'bento__bento_type__bento_type', 'number', named=True).order_by('bento__bento_type__bento_type')
+                    searching_date = get_taiwan_current_datetime().date()+timedelta(1)
+                    print(searching_date)
+                    orders = Order.objects.filter(bento__date=searching_date, distribution_place=dp, delete_time=None).values_list('bento__id', 'bento__name', 'bento__bento_type__bento_type', 'number', named=True).order_by('bento__bento_type__bento_type')
+                    print(orders)
+                    if len(orders) != 0:
+                        df_orders = pd.DataFrame(list(orders))
+                        df_orders['bento_id'] = df_orders['bento__id']
+                        df_orders['bento_name'] = df_orders['bento__name']
+                        df_orders['bento_type'] = df_orders['bento__bento_type__bento_type']
+                        df_orders_groupped = df_orders.groupby(['bento_name', 'bento_id', 'bento_type']).sum().reset_index()
+                        def combine_area_limitation(row):
+                            al = AreaLimitation.objects.get(bento=row['bento_id'], area=area)
+                            row['limitation'] = al.limitation
+                            row['remain'] = al.remain
+                            return row
+                        df_orders_groupped = df_orders_groupped.apply(combine_area_limitation, axis=1)[['bento_name', 'bento_id', 'bento_type', 'number', 'limitation', 'remain']]
+                        print(df_orders_groupped)
+                        distribution_place_order['order_list'] = list(df_orders_groupped.T.to_dict().values())
+                    else:
+                        distribution_place_order['order_list'] = []
+                    area_order['distribution_place_order'].append(distribution_place_order)
+                order_list_groupped_table.append(area_order)
             context ={
                 "title": "當日出貨統計",
-                "order_list_groupby_area":order_list_groupby_area,
-                "order_list_groupby_distribution_place":order_list_groupby_distribution_place,
-                'table_html':table_html
-
+                # "order_list_groupby_area":order_list_groupby_area,
+                # "order_list_groupby_distribution_place":order_list_groupby_distribution_place,
+                "order_list_groupped_table" : order_list_groupped_table,
             }
             return render(request, 'order/beckend_daily_ouput_stats.html', context)
                    

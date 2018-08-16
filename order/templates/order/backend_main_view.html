@@ -23,7 +23,13 @@
 <h4>出貨(管理員)</h4>
 <ul>
     <li>
-        <a href="{% url 'order:beckend_daily_ouput_stats' %}">出貨統計</a>
+        <a href="{% url 'order:backend_daily_ouput_stats' add_days=0 %}">出貨統計(今)</a>
+    </li>
+    <li>
+        <a href="{% url 'order:backend_daily_ouput_stats' add_days=1 %}">出貨統計(明)</a>
+    </li>
+    <li>
+        <a href="{% url 'order:backend_daily_ouput_stats' add_days=2 %}">出貨統計(後)</a>
     </li>
 </ul>
 

@@ -11,36 +11,52 @@
     #searchInput{
         max-width: 300px;
     }
+    
+    h5{
+        margin-left: 30px;
+    }
+    table{
+        margin-left: 50px;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <h2>{{ title }}</h2>
 <h4>出貨統計</h4>
+
+
+
 <div class="row">
-    <table  class="table" id="goruppedTable">
+{% for os in order_stats %}
+    <h5>{{ os.distribution_place }}</h5>
+    <table class="table statsTable">
         <thead>
             <tr>
-                <th>學校</th>
-                <th>地點</th>
+                <th>類別</th>
                 <th>便當</th>
-                <th>已領取</th>
-                <th>剩下</th>
-
+                <th>已領</th>
+                <th>未領</th>
+                <th>現場</th>
             </tr>
         </thead>
         <tbody>
-            {% for order in order_list_group %}
+            {% for stat in os.order_stat %}
             <tr>
-                <td>{{ order.area }}</td>
-                <td>{{ order.distribution_place }}</td>
-                <td>{{ order.bento_name }}</td>
-                <td>{{ order.received_number }}</td>
-                <td>{{ order.remain_number }}</td>
+                <td>{{ stat.bento_type }}</td>
+                <td>{{ stat.bento_name }}</td>
+                <td>{{ stat.received }}</td>
+                <td>{{ stat.unreceived }}</td>
+                <td>{{ stat.remain }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+
+{% endfor %}
+
+
 </div>
 
 
@@ -60,7 +76,6 @@
                 <th>Line名稱</th>
                 <th>手機</th>
                 <th hidden="hidden">phone_last3</th>
-                <th>學校</th>
                 <th>地點</th>
                 <th>便當</th>
                 <th>個數</th>
@@ -76,7 +91,6 @@
                 <td>{{ order.line_name }}</td>
                 <td>{{ order.phone }}</td>
                 <td hidden="hidden">{{ order.phone_last3 }}</td>
-                <td>{{ order.area }}</td>
                 <td>{{ order.distribution_place }}</td>
                 <td>{{ order.bento_name }}</td>
                 <td>{{ order.number }}</td>
@@ -99,25 +113,41 @@
         order_id = $(this).parents('tr').eq(0).find('td').eq(0).text()
         order_number = $(this).parents('tr').eq(0).find('td').eq(7).text()
         distribution_place = $(this).parents('tr').eq(0).find('td').eq(5).text()
-            
+        bento = $(this).parents('tr').eq(0).find('td').eq(6).text()
+        
         current_td = $(this).parents('td').eq(0)
-        $.ajax({
-            type: 'GET',
-            url: '/order/beckend_receive_order/' + order_id.toString() + '/',
-            dataType: 'json',
-            error: function(xhr) {
-                alert('發生錯誤');
-            },
-            success: function (data) {
-                current_td.html("已領取")
-                $("#goruppedTable tbody tr").each(function(){
-                    if ($(this).find('td').eq(1).text() == distribution_place){
-                        $(this).find('td').eq(3).text(Number($(this).find('td').eq(3).text())+Number(order_number))
-                        $(this).find('td').eq(4).text(Number($(this).find('td').eq(4).text())-Number(order_number))
+        $(".statsTable").each(function(){
+            if ($(this).prev().text() == distribution_place){
+                $(this).find("tbody tr").each(function(){
+                    if($(this).find("td").eq(1).text()==bento){
+                        //TODO deal with share the same limitation
+                        target_tr =$(this)
+                        target_tr.find("td").eq(2).text((Number(target_tr.find("td").eq(2).text()) + Number(order_number)).toString())
+                        target_tr.find("td").eq(3).text((Number(target_tr.find("td").eq(3).text()) - Number(order_number)).toString())
                     }
                 })
+                //$(this).find('td').eq(3).text(Number($(this).find('td').eq(3).text())+Number(order_number))
+                //$(this).find('td').eq(4).text(Number($(this).find('td').eq(4).text())-Number(order_number))
             }
-        });
+        })
+//        $.ajax({
+//            type: 'GET',
+//            url: '/order/beckend_receive_order/' + order_id.toString() + '/',
+//            dataType: 'json',
+//            error: function(xhr) {
+//                alert('發生錯誤');
+//            },
+//            success: function (data) {
+//                current_td.html("已領取")
+//                $(".statsTable").each(function(){
+//                    
+//                    if ($(this).find('td').eq(1).text() == distribution_place){
+//                        $(this).find('td').eq(3).text(Number($(this).find('td').eq(3).text())+Number(order_number))
+//                        $(this).find('td').eq(4).text(Number($(this).find('td').eq(4).text())-Number(order_number))
+//                    }
+//                })
+//            }
+//        });
     })
 
     var $rows = $('#orderList tbody tr');

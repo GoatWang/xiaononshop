@@ -29,9 +29,11 @@
                   <span class="sr-only">(current)</span>
                 </a>
               </li> -->
-              <!-- <li class="nav-item">
-                <a class="nav-link" href="#">關於</a>
-              </li> -->
+              {% if user.is_staff %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'order:backend_main_view' %}">後臺主頁</a>
+              </li>
+              {% endif %}
               <!-- <li class="nav-item">
                 <a class="nav-link" href="#">服務</a>
               </li> -->

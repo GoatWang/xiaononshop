@@ -23,8 +23,7 @@ urlpatterns = [
     path('backend_delete_superuser/<str:line_id>/', views.backend_delete_superuser, name='backend_delete_superuser'),
     path('backend_daily_output_order/<str:area_id>/', views.backend_daily_output_order, name='backend_daily_output_order'),
     path('backend_receive_order/<str:order_id>/', views.backend_receive_order, name='backend_receive_order'),
-    path('backend_daily_ouput_stats/', views.backend_daily_ouput_stats, name='backend_daily_ouput_stats'),
-    path('backend_tomorrow_ouput_stats/', views.backend_tomorrow_ouput_stats, name='backend_tomorrow_ouput_stats'),
+    path('backend_daily_ouput_stats/<int:add_days>/', views.backend_daily_ouput_stats, name='backend_daily_ouput_stats'),
 
     #bot
     path('callback/', views.callback, name='callback'),

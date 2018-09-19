@@ -15,27 +15,27 @@ import json
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-if 'LINE_CHANNEL_SECRET' in os.environ:
-    pwddata = {
-        "LINE_CHANNEL_ACCESS_TOKEN" : os.environ.get('LINE_CHANNEL_ACCESS_TOKEN'),
-        "LINE_CHANNEL_SECRET" : os.environ.get('LINE_CHANNEL_SECRET'),
-        "LINE_LOGIN_CHANNEL_ID" : os.environ.get('LINE_LOGIN_CHANNEL_ID'),
-        "LINE_LOGIN_CHANNEL_SECRET" : os.environ.get('LINE_LOGIN_CHANNEL_SECRET'),
-        "POSTGRES_HOST" : os.environ.get('POSTGRES_HOST'),
-        "POSTGRES_PORT" : os.environ.get('POSTGRES_PORT'),
-        "POSTGRES_USERNAME" : os.environ.get('POSTGRES_USERNAME'),
-        "POSTGRES_PASSWORD" : os.environ.get('POSTGRES_PASSWORD'),
-        "AWS_ACCESS_KEY_ID" : os.environ.get('AWS_ACCESS_KEY_ID'),
-        "AWS_SECRET_ACCESS_KEY" : os.environ.get('AWS_SECRET_ACCESS_KEY'),
-        "AWS_STORAGE_BUCKET_NAME" : os.environ.get('AWS_STORAGE_BUCKET_NAME'),
-        "DOMAIN": os.environ.get('DOMAIN'),
-        "DEBUG": os.environ.get('DEBUG')
-    }
-else:
-    with open(os.path.join(BASE_DIR, "pwd.json"), 'r', encoding='utf8') as f:
-        pwddata = json.load(f)
+# if 'LINE_CHANNEL_SECRET' in os.environ:
+#     pwddata = {
+#         "LINE_CHANNEL_ACCESS_TOKEN" : os.environ.get('LINE_CHANNEL_ACCESS_TOKEN'),
+#         "LINE_CHANNEL_SECRET" : os.environ.get('LINE_CHANNEL_SECRET'),
+#         "LINE_LOGIN_CHANNEL_ID" : os.environ.get('LINE_LOGIN_CHANNEL_ID'),
+#         "LINE_LOGIN_CHANNEL_SECRET" : os.environ.get('LINE_LOGIN_CHANNEL_SECRET'),
+#         "POSTGRES_HOST" : os.environ.get('POSTGRES_HOST'),
+#         "POSTGRES_PORT" : os.environ.get('POSTGRES_PORT'),
+#         "POSTGRES_USERNAME" : os.environ.get('POSTGRES_USERNAME'),
+#         "POSTGRES_PASSWORD" : os.environ.get('POSTGRES_PASSWORD'),
+#         "AWS_ACCESS_KEY_ID" : os.environ.get('AWS_ACCESS_KEY_ID'),
+#         "AWS_SECRET_ACCESS_KEY" : os.environ.get('AWS_SECRET_ACCESS_KEY'),
+#         "AWS_STORAGE_BUCKET_NAME" : os.environ.get('AWS_STORAGE_BUCKET_NAME'),
+#         "DOMAIN": os.environ.get('DOMAIN'),
+#         "DEBUG": os.environ.get('DEBUG')
+#     }
+# else:
+#     with open(os.path.join(BASE_DIR, "pwd.json"), 'r', encoding='utf8') as f:
+#         pwddata = json.load(f)
 
 
 # Quick-start development settings - unsuitable for production
@@ -45,10 +45,10 @@ else:
 SECRET_KEY = '1v^q654^2@l1k%t0^wgy1c3_$o)0+fjsxhzcj!qb%l-y6d9(+s'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-if 'DEBUG' in os.environ:
-    DEBUG = os.environ['DEBUG'] == 'True'
-else:
-    DEBUG = False
+# if 'DEBUG' in os.environ:
+#     DEBUG = os.environ['DEBUG'] == 'True'
+# else:
+#     DEBUG = False
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -115,16 +115,17 @@ WSGI_APPLICATION = 'xiaonon.wsgi.application'
 #         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
 #     }
 # }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': pwddata['POSTGRES_USERNAME'],
-        'PASSWORD': pwddata['POSTGRES_PASSWORD'],
-        'HOST': pwddata['POSTGRES_HOST'],
-        'PORT': pwddata['POSTGRES_PORT'],
-    }
-}
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'postgres',
+#         'USER': pwddata['POSTGRES_USERNAME'],
+#         'PASSWORD': pwddata['POSTGRES_PASSWORD'],
+#         'HOST': pwddata['POSTGRES_HOST'],
+#         'PORT': pwddata['POSTGRES_PORT'],
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -162,12 +163,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # S3 access settings
-AWS_ACCESS_KEY_ID = pwddata['AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY = pwddata['AWS_SECRET_ACCESS_KEY']
-AWS_STORAGE_BUCKET_NAME = pwddata['AWS_STORAGE_BUCKET_NAME']
+# AWS_ACCESS_KEY_ID = pwddata['AWS_ACCESS_KEY_ID']
+# AWS_SECRET_ACCESS_KEY = pwddata['AWS_SECRET_ACCESS_KEY']
+# AWS_STORAGE_BUCKET_NAME = pwddata['AWS_STORAGE_BUCKET_NAME']
 
 # S3 file storage settings (user upload)
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
@@ -177,10 +178,10 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
 
 # S3 static settings
-STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
-STATIC_LOCATION = 'static'  # Settings used in storages.py
-STATICFILES_STORAGE = 'xiaonon.storages.StaticStorage' ## disable static_root: will directly help you collect static files to S3 when running collectstatic 
-STATIC_URL = 'https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'  ## for accsessing static files in S3
+# STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
+# STATIC_LOCATION = 'static'  # Settings used in storages.py
+# STATICFILES_STORAGE = 'xiaonon.storages.StaticStorage' ## disable static_root: will directly help you collect static files to S3 when running collectstatic 
+# STATIC_URL = 'https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'  ## for accsessing static files in S3
 
 # S3 media settings
 # ENV_PATH = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -189,10 +190,10 @@ STATIC_URL = 'https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/'  ## for
 # DEFAULT_FILE_STORAGE = 'TPautomation.storages.MediaStorage'  ## from django.core.files.storage import default_storage
 # MEDIA_URL = 'https://' + AWS_STORAGE_BUCKET_NAME + '.s3.amazonaws.com/media/'  ## seems like I have to upload my media to this url
 
-LINE_CHANNEL_ACCESS_TOKEN = pwddata['LINE_CHANNEL_ACCESS_TOKEN']
-LINE_CHANNEL_SECRET = pwddata['LINE_CHANNEL_SECRET']
-LINE_LOGIN_CHANNEL_ID = pwddata['LINE_LOGIN_CHANNEL_ID']
-LINE_LOGIN_CHANNEL_SECRET = pwddata['LINE_LOGIN_CHANNEL_SECRET']
+# LINE_CHANNEL_ACCESS_TOKEN = pwddata['LINE_CHANNEL_ACCESS_TOKEN']
+# LINE_CHANNEL_SECRET = pwddata['LINE_CHANNEL_SECRET']
+# LINE_LOGIN_CHANNEL_ID = pwddata['LINE_LOGIN_CHANNEL_ID']
+# LINE_LOGIN_CHANNEL_SECRET = pwddata['LINE_LOGIN_CHANNEL_SECRET']
 
-DOMAIN = pwddata['DOMAIN']
-AWS_BUCKET_URL = "https://s3-ap-southeast-1.amazonaws.com/"+AWS_STORAGE_BUCKET_NAME+"/"
+# DOMAIN = pwddata['DOMAIN']
+# AWS_BUCKET_URL = "https://s3-ap-southeast-1.amazonaws.com/"+AWS_STORAGE_BUCKET_NAME+"/"

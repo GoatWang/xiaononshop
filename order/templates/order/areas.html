@@ -1,0 +1,42 @@
+{% extends "order/layout.html" %}
+{% load staticfiles %}
+
+
+{% block scripts_top %}
+{% endblock %}
+
+{% block styles %}
+<style>
+    a {
+        margin-bottom: 10px;
+
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+    <h2>請選擇取餐的學校</h2>
+
+    <div class="row">
+        {% for area in area_list %}
+        <div class="col-sm">
+            <a role="button" class="btn btn-secondary" href="{{ url_head }}order/order_create/{{area.0}}/{{area.2}}">
+                {{area.1}}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+</script>
+{% endblock %}

@@ -1,36 +1,36 @@
-{% extends "order/layout.html" %}
-{% load staticfiles %}
-
-
-{% block scripts_top %}
-{% endblock %}
-
-
-{% block styles %}
+{% extends "order/layout.html" %} {% load staticfiles %} {% block scripts_top %} {% endblock %} {% block styles %}
 <style>
     .card-title {
         font-size: 18px;
     }
+
     .card-text {
-        margin-top:2px;
-        margin-bottom:2px;
+        margin-top: 2px;
+        margin-bottom: 2px;
     }
+
     #priceTotalLabel font {
-        color:red;
+        color: red;
     }
+
     #priceTotalLabel {
-        font-size:20px;
+        font-size: 20px;
     }
+
     #areaDistributionDropdownDiv {
         margin-bottom: 15px;
     }
-</style>
-{% endblock %}
 
-{% block content %}
+    #phone_and_submit{
+        margin-left: 5px;
+    }
+</style>
+{% endblock %} {% block content %}
 <h2>{{ title }}</h2>
-<h4>學校--取餐地點</h4>
-<div class="dropdown" id='areaDistributionDropdownDiv'>
+<h3 id="area_title" data-area-id="{{ area.id }}">學校 -- {{ area }}</h3>
+<h5>(取餐時間：{{ area_receive_time.0 }} ~ {{ area_receive_time.1 }})</h5>
+<br>
+<!-- <div class="dropdown" id='areaDistributionDropdownDiv'>
     <button class="btn btn-outline-secondary btn-block dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         {{ selected_adp_option_text }}
     </button>
@@ -43,195 +43,370 @@
             {% endif %}
         {% endfor %}
     </div>
-</div>
+</div> -->
 
 
+{% for weekday_key, weekday_value in weekdays.items %}
+<!-- 週一～週四 顯示明天到週五 -->
+{% if weekday_key > today and weekday_key < 5 %} <h4>星期{{ weekday_value }}</h4>
+    <div class="row text-center">
+        <br>
+        {% for bento in available_bentos %}
+        {% if bento.weekday == weekday_key %}
+        <div class="col-lg-3 col-md-6 my-4 mx-2">
+            <div class="card">
+                <img class="card-img-top" src="{{ bento.photo }}" alt="">
+                <div class="card-body">
+                    <h4 class="card-title bentoNameH4">
+                        <strong>{{ bento.name }}</strong>
+                        <!-- (剩餘<strong class="remain">{{ bento.remain }}</strong><strong>個)</strong> -->
+                    </h4>
+                    <p class="card-text dateTypeP">{{ bento.date }}({{ weekday_value }})</p>
+                    <p class="card-text">{{ bento.cuisine }}</p>
+                    <p class="card-text idP" hidden>{{ bento.id }}</p>
 
-<h4>飯盒</h4>
-<div class="row text-center">
-    {% for bento in available_bentos %}
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card">
-            <img class="card-img-top" src="{{ bento.photo }}" alt="">
-            <div class="card-body">
-                <h4 class="card-title bentoNameH4"><strong>{{ bento.name }}(剩餘{{ bento.remain }}個)</strong></h4>
-                <p class="card-text dateTypeP">{{ bento.date }} {{ bento.bento_type }}</p>
-                <p class="card-text">{{ bento.cuisine }}</p>
-                <p class="card-text idP" hidden>{{ bento.id }}</p>
-
-            </div>
-            <div class="card-footer">
-                <div class="form-group row">
-                    <label for="numberInput{{ bento.id }}" class="col-5 col-form-label priceLabel">{{ bento.price }}元</label>
-                    <div class="col-5">
-                        <select class="form-control numberInput">
-                            {% for i in bento.select_range %}
-                                <option>{{ i }}</option>
-                            {% endfor %}
-                        </select>
+                </div>
+                <div class="card-footer">
+                    <!-- 領取地點選單 -->
+                    <div class="form-group row">
+                        <label for="dpInput{{ bento.id }}" class="dropdown" id="btdpdropdown" data-toggle="dropdown">
+                        </label>
+                        <div class="col-12"> 領取地點 </div>
+                        <div class="col-12">
+                            <select class="form-control dpInput">
+                                {% for dpitem in dp_items %}
+                                <option value="{{ dpitem.id }}">{{ dpitem.distribution_place }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
-                    <label  class="col-2 col-form-label">個</label>
+                    <!-- 數量選單 -->
+                    <div class="form-group row">
+                        <label for="numberInput{{ bento.id }}" class="col-5 col-form-label priceLabel">
+                            {{ bento.price }}元
+                        </label>
+                        <div class="col-4">
+                            <select class="form-control numberInput">
+                                {% for i in bento.select_range %}
+                                <option>{{ i }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <label class="col-2 col-form-label">個</label>
+                    </div>
+                    <small>(現場憑學生證一個便當折價 10 元)</small>
                 </div>
             </div>
         </div>
+        {% endif %}
+        {% endfor %}
     </div>
-    {% endfor %}
-</div>
+    <!-- 週五、六、日 顯示下週一到下週五-->
+    {% elif today > 3 %}
+    {% if weekday_key < 5%} <h4>星期{{ weekday_value }}</h4>
+        <div class="row text-center">
+            <br>
+            {% for bento in available_bentos %}
+            {% if bento.weekday == weekday_key %}
+            <div class="col-lg-3 col-md-6 my-4 mx-2">
+                <div class="card">
+                    <img class="card-img-top" src="{{ bento.photo }}" alt="">
+                    <div class="card-body">
+                        <h4 class="card-title bentoNameH4">
+                            <strong>{{ bento.name }}</strong>
+                            <!-- (剩餘</strong><strong class="remain">{{ bento.remain }}</strong><strong>個) -->
+                        </h4>
+                        <p class="card-text dateTypeP">{{ bento.date }}({{ weekday_value }})</p>
+                        <p class="card-text">{{ bento.cuisine }}</p>
+                        <p class="card-text idP" hidden>{{ bento.id }}</p>
 
-<h4>結帳</h4>
-<div id="summaryTableDiv" class="row text-center">
-    <table class="table" id="summaryTable">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">日期</th>
-                <th scope="col">飯盒</th>
-                <th scope="col">單價</th>
-                <th scope="col">個數</th>
-                <th scope="col">小計</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- <tr>
+                    </div>
+                    <div class="card-footer">
+                        <!-- 領取地點選單 -->
+                        <div class="form-group row">
+                            <label for="dpInput{{ bento.id }}" class="dropdown" id="btdpdropdown" data-toggle="dropdown">
+                            </label>
+                            <div class="col-12"> 領取地點 </div>
+                            <div class="col-12">
+                                <select class="form-control dpInput">
+                                    {% for dpitem in dp_items %}
+                                    <option value="{{ dpitem.id }}">{{ dpitem.distribution_place }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <!-- 數量選單 -->
+                        <div class="form-group row">
+                            <label for="numberInput{{ bento.id }}" class="col-5 col-form-label priceLabel">
+                                {{ bento.price }}元
+                            </label>
+                            <div class="col-4">
+                                <select class="form-control numberInput">
+                                    {% for i in bento.select_range %}
+                                    <option>{{ i }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <label class="col-2 col-form-label">個</label>
+                        </div>
+                        <small>(現場憑學生證一個便當折價 10 元)</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endif %}
+{% endfor %}
+
+        <h4>結帳</h4>
+        <div id="summaryTableDiv" class="row text-center">
+            <table class="table" id="summaryTable">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">日期</th>
+                        <th scope="col">飯盒</th>
+                        <th scope="col">單價</th>
+                        <th scope="col">個數</th>
+                        <th scope="col">小計</th>
+                        <th scope="col">領取地點</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- <tr>
             <th scope="row">1</th>
             <td>Mark</td>
             <td>Otto</td>
             <td>@mdo</td>
             </tr> -->
-        </tbody>
-    </table>
-</div>
-<p align="right" id="priceTotalLabel">總計<font>0</font>元<p/>
+                </tbody>
+            </table>
+        </div>
+        <p align="right" id="priceTotalLabel">
+            總計
+            <font>0</font>元
+        </p>
 
 
-<div class="row">
-    <!-- <div class="input-group mb-3">
-        <div class="input-group-prepend">
-            <div class="input-group-text">
-            <input type="checkbox" aria-label="Checkbox for following text input">
+        <div class="row" id = "phone_and_submit">
+            <form>
+                <div class="form-group">
+                    <label for="userPhoneInput">聯絡電話</label>
+                    {% if user_phone %}
+                    <input type="tel" class="form-control" id="userPhoneInput" value="{{ user_phone }}" placeholder="0912345678">
+                    {% else %}
+                    <input type="tel" class="form-control" id="userPhoneInput" placeholder="0912345678"> {% endif %}
+                    <small id="emailHelp" class="form-text text-muted">作為領取便當時確認身分用途</small>
+                </div>
+            </form>
+            <div class="input-group mb-3">
+                <button id="submitBtn" type="button" class="btn btn-outline-secondary">提交訂單</button>
             </div>
         </div>
-        <input type="text" class="form-control" aria-label="Text input with checkbox" disabled="disabled" value="同意小農要求您的email以便訂單確認。Agree xiaonon to request your email to confirm the order.">
-    </div> -->
-    <form>
-        <div class="form-group">
-            <label for="userPhoneInput">聯絡電話</label>
-            {% if user_phone %}
-            <input type="tel" class="form-control" id="userPhoneInput" value="{{ user_phone }}" placeholder="0912345678">
-            {% else %}
-            <input type="tel" class="form-control" id="userPhoneInput" placeholder="0912345678">
-            {% endif %}
-            <small id="emailHelp" class="form-text text-muted">作為領取便當時確認身分用途</small>
-        </div>
-    </form>
-    <div class="input-group mb-3">
-        <button id="submitBtn" type="button" class="btn btn-outline-secondary">提交訂單</button>
-    </div>
-</div>
-{% endblock %}
-{% block scripts %}
-<script>
 
-    $(".numberInput").change(function(){
-        $("#summaryTable tbody").empty()
-        subtotals = []
-        rowCounts = 0
-        $(".card").each(function(){
-            date = $(this).find(".dateTypeP").text().split(" ")[0]
-            name = $(this).find(".bentoNameH4").text().split("(")[0]
-            number = $(this).find(".numberInput").val()
-            price = $(this).find(".priceLabel").text().replace("元", "")
-            subtotal = (Number(number)*Number(price)).toString()
-            
-            //TODO: add discount columns
-            if(number != "" && number != '0'){
-                rowCounts += 1
-                tr = $("<tr>")
-                idx_td = $("<td>").attr("scope", 'row').text(rowCounts)
-                date_td = $("<td>").text(date)
-                name_td = $("<td>").text(name)
-                price_td = $("<td>").text(price)
-                number_td = $("<td>").text(number)
-                subtotal_td = $("<td>").text(subtotal)
-                tr.append(idx_td).append(date_td).append(name_td).append(price_td).append(number_td).append(subtotal_td)
-                $("#summaryTable tbody").append(tr)
-                subtotals.push(subtotal)
-            }
-        })
+        {% endblock %} {% block scripts %}
 
-        sumOfSubtotals = 0
-        $(subtotals).each(function(i,v){
-            sumOfSubtotals += Number(v)
-        })
-        $("#priceTotalLabel font").text(sumOfSubtotals.toString())
-    })
 
-    $("#submitBtn").click(function(){
-        $('body').css('cursor','wait');
-        orderData = []
-        currentUrl = window.location.href 
-        area_id = !isNaN(currentUrl.split("/")[5]) ? currentUrl.split("/")[5]:1
-        distribution_place_id = !isNaN(currentUrl.split("/")[6]) ? currentUrl.split("/")[6]:1
-        $(".card").each(function(){
-            //TODO: record price column
-            id = $(this).find(".idP").text()
-            number = $(this).find(".numberInput").val()
-            if(number != "" && number != '0'){
-                orderData.push({
-                    "bento_id":id, 
-                    "order_number":number,
-                    "area_id":area_id,
-                    "distribution_place_id":distribution_place_id
-                })
-            }
-        })
-        
-        phone_reg = $("#userPhoneInput").val().match(/^09[\d]{8}/gm)
-        phone_valid = (phone_reg)? phone_reg[0] == $("#userPhoneInput").val():NaN
-        if(orderData.length == 0){
-            alert("請選擇您要的便當。")
-        }
-        else if(!phone_reg || !phone_valid)
-        {
-            alert("請輸入正確的電話號碼格式。")
-        }
-        else
-        {
-            console.log({"orderData":JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val()})
-            $.ajax({
-                type: 'POST',
-                url: '{% url "order:order_create" %}',
-                data: {"orderData":JSON.stringify(orderData), "user_phone":$("#userPhoneInput").val()},
-                async : false,  
-                dataType: 'json',
-                success: function (data) {
-                    alert("訂購成功!")
-                },
-                error: function (jqXHR, exception) {
-                    var msg = '';
-                    if (jqXHR.status === 0) {
-                        msg = 'Not connect.\n Verify Network.';
-                    } else if (jqXHR.status == 404) {
-                        msg = 'Requested page not found. [404]';
-                    } else if (jqXHR.status == 500) {
-                        msg = 'Internal Server Error [500].';
-                    } else if (exception === 'parsererror') {
-                        msg = 'Requested JSON parse failed.';
-                    } else if (exception === 'timeout') {
-                        msg = 'Time out error.';
-                    } else if (exception === 'abort') {
-                        msg = 'Ajax request aborted.';
-                    } else {
-                        msg = 'Uncaught Error.\n' + jqXHR.responseText;
-                    }
-                    alert("訂購失敗 "+msg)
-                },
+        <script>
+            $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                }
             });
-            window.location = "{% url 'order:order_list' %}";      
-        }
-        $('body').css('cursor','auto');
-    })
+        </script>
+        <script>
+            var updateNumber = function (input) {
+                var parent_card = input.closest(".card")
+                var dp_id_int = parseInt(parent_card.find(".dpInput :selected").val())
+                var id = parseInt(parent_card.find(".idP").text())
+                var el_remain = parent_card.find(".remain")
+                var number = parent_card.find(".numberInput").val()
+                var option_length = 0
+                // console.log(parent_card, dp_id_int, id, el_remain, number)
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "order:order_number_update" %}',
+                    data: {
+                        "dp_id": JSON.stringify(dp_id_int),
+                        "bento_id": JSON.stringify(id)
+                    },
+                    async: false,
+                    dataType: 'json',
+                    success: function (response) {
+                        var remain = response.remain
+                        remain_new = remain - number
+                        el_remain.html(remain_new)
+                        option_length = remain
+                    },
+                    error: function (jqXHR, exception) {
+                        var msg = '';
+                        if (jqXHR.status === 0) {
+                            msg = 'Not connect.\n Verify Network.';
+                        } else if (jqXHR.status == 404) {
+                            msg = 'Requested page not found. [404]';
+                        } else if (jqXHR.status == 500) {
+                            msg = 'Internal Server Error [500].';
+                        } else if (exception === 'parsererror') {
+                            msg = 'Requested JSON parse failed.';
+                        } else if (exception === 'timeout') {
+                            msg = 'Time out error.';
+                        } else if (exception === 'abort') {
+                            msg = 'Ajax request aborted.';
+                        } else {
+                            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                        }
+                        // alert("請求失敗 " + msg)
+                        alert("訂購便當失敗，請重新嘗試或是聯繫服務人員，謝謝")
+                    },
+                })
+                return option_length
+            };
 
-</script>
+            var detectChanges = function () {
+                $("#summaryTable tbody").empty()
+                subtotals = []
+                rowCounts = 0
+                remain_now =
+                    $(".card").each(function () {
+                        date = $(this).find(".dateTypeP").text().split(" ")[0]
+                        name = $(this).find(".bentoNameH4").text().split("(")[0]
+                        number = $(this).find(".numberInput").val()
+                        dp_id = $(this).find(".dpInput :selected").val()
+                        dp = $(this).find(".dpInput :selected").text()
+                        price = $(this).find(".priceLabel").text().replace("元", "")
+                        subtotal = (Number(number) * Number(price)).toString()
 
-{% endblock %}
+                        //TODO: add discount columns
+                        if (number != "" && number != '0') {
+                            rowCounts += 1
+                            tr = $("<tr>")
+                            idx_td = $("<td>").attr("scope", 'row').text(rowCounts)
+                            date_td = $("<td>").text(date)
+                            name_td = $("<td>").text(name)
+                            price_td = $("<td>").text(price)
+                            number_td = $("<td>").text(number)
+                            dp_td = $("<td>").text(dp)
+                            subtotal_td = $("<td>").text(subtotal)
+                            tr.append(idx_td).append(date_td).append(name_td).append(price_td).append(number_td)
+                                .append(subtotal_td).append(dp_td)
+                            $("#summaryTable tbody").append(tr)
+                            subtotals.push(subtotal)
+                        }
+                    })
+
+                sumOfSubtotals = 0
+                $(subtotals).each(function (i, v) {
+                    sumOfSubtotals += Number(v)
+                })
+                $("#priceTotalLabel font").text(sumOfSubtotals.toString())
+            }
+
+            $(".numberInput").change(function () {
+                detectChanges()
+                selected = $(this)
+                updateNumber(selected)
+            })
+
+            $(".dpInput").change(function () {
+                detectChanges()
+                selected = $(this)
+                option_length = updateNumber(selected)
+                option_length = option_length > 6 ? 6 : option_length + 1
+                selected.closest(".card").find(".numberInput").val(0)
+                // update options
+                numberInput = selected.closest(".card").find(".numberInput")
+                numberInput.empty()
+                for (var i = 0; i < option_length; i++) {
+                    numberInput.append("<option>" + i + "</option>")
+                }
+
+
+                // for(i = 0; i<remain+1;i++){
+                //     console.log(i)
+                // }
+
+            })
+
+            $("#submitBtn").click(function () {
+                // if (confirm('您要訂購的是...？')){
+
+                // }
+                // else {
+
+                // }
+                $('body').css('cursor', 'wait');
+                orderData = []
+                currentUrl = window.location.href
+                // $("#area_title").data("area-id")
+                area_id = {{ area.id }}
+                // area_id = !isNaN(currentUrl.split("/")[5]) ? currentUrl.split("/")[5] : 1
+                // distribution_place_id = !isNaN(currentUrl.split("/")[6]) ? currentUrl.split("/")[6] : 1
+                $(".card").each(function () {
+                    //TODO: record price column
+                    id = $(this).find(".idP").text()
+                    number = $(this).find(".numberInput").val()
+                    distribution_place_id = $(this).find(".dpInput").val()
+                    if (number != "" && number != '0') {
+                        orderData.push({
+                            "bento_id": id,
+                            "order_number": number,
+                            "area_id": area_id,
+                            "distribution_place_id": distribution_place_id
+                        })
+                    }
+                })
+
+                phone_reg = $("#userPhoneInput").val().match(/^09[\d]{8}/gm)
+                phone_valid = (phone_reg) ? phone_reg[0] == $("#userPhoneInput").val() : NaN
+                if (orderData.length == 0) {
+                    alert("請選擇您要的便當。")
+                } else if (!phone_reg || !phone_valid) {
+                    alert("請輸入正確的電話號碼格式。")
+                } else {
+                    console.log({
+                        "orderData": JSON.stringify(orderData),
+                        "user_phone": $("#userPhoneInput").val()
+                    })
+                    $.ajax({
+                        type: 'POST',
+                        url: '{% url "order:order_create" %}',
+                        data: {
+                            "orderData": JSON.stringify(orderData),
+                            "user_phone": $("#userPhoneInput").val()
+                        },
+                        async: false,
+                        dataType: 'json',
+                        success: function (data) {
+                            alert("訂購成功!")
+                            window.location = "{% url 'order:message'%}";
+                        },
+                        error: function (jqXHR, exception) {
+                            var msg = '';
+                            if (jqXHR.status === 0) {
+                                msg = 'Not connect.\n Verify Network.';
+                            } else if (jqXHR.status == 404) {
+                                msg = 'Requested page not found. [404]';
+                            } else if (jqXHR.status == 500) {
+                                msg = 'Internal Server Error [500].';
+                            } else if (exception === 'parsererror') {
+                                msg = 'Requested JSON parse failed.';
+                            } else if (exception === 'timeout') {
+                                msg = 'Time out error.';
+                            } else if (exception === 'abort') {
+                                msg = 'Ajax request aborted.';
+                            } else {
+                                msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                            }
+                            alert("訂購失敗 " + msg)
+                            alert("訂購便當失敗，請重新嘗試或是聯繫服務人員，謝謝")
+                        },
+                    });
+                    
+                }
+                $('body').css('cursor', 'auto');
+            })
+        </script>
+
+        {% endblock %}

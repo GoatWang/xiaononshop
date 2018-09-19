@@ -25,6 +25,7 @@
                 <!-- <th scope="col">類型</th> -->
                 <th scope="col">價格</th>
                 <th scope="col">個數</th>
+                <th scope="col">取餐地點</th>
                 <!-- <th scope="col">菜色</th> -->
                 <th></th>
             </tr>
@@ -34,17 +35,18 @@
             <tr>
                 <th scope="row">{{ co.row_id }}</th>
                 <td class="idTd" hidden='hidden'>{{ co.id }}</td>
-                <td calss="dateTd">{{ co.date }}</td>
+                <td class="dateTd">{{ co.date }} ({{ co.weekday }}) </td>
                 <td>{{ co.name }}</td>
                 <!-- <td>{{ co.type }}</td> -->
                 <td>{{ co.price }}</td>
                 <td>{{ co.number }}</td>
+                <td>{{ co.distribution_place }}</td>
                 <!-- <td>{{ co.cuisine }}</td> -->
-                {% if co.today %}
+                {% if co.today and now >= 11 %}
                 <!-- <td><input type="button" class="btn btn-danger" value="取消"></a></td> -->
                 <td><a href="{% url 'order:order_delete' order_id=co.id %}" class="btn btn-danger disabled">取消訂單</a></td>
                 {% else %}
-                <td><a href="{% url 'order:order_delete' order_id=co.id %}" class="btn btn-danger">取消訂單</a></td>
+                <td><a href="{% url 'order:order_delete' order_id=co.id %}" class="btn btn-danger btn_del_order">取消訂單</a></td>
                 {% endif %}
             </tr>
             {% endfor %}
@@ -67,6 +69,9 @@
                 <!-- <th scope="col">類型</th> -->
                 <th scope="col">價格</th>
                 <th scope="col">個數</th>
+                <th scope="col">取餐地點</th>
+                <th scope="col">領取</th>
+                
                 <!-- <th scope="col">菜色</th> -->
             </tr>
         </thead>
@@ -75,11 +80,17 @@
             <tr>
                 <th scope="row">{{ co.row_id }}</th>
                 <td class="idTd" hidden='hidden'>{{ co.id }}</td>
-                <td calss="dateTd">{{ co.date }}</td>
+                <td calss="dateTd">{{ co.date }} ({{ co.weekday }})</td>
                 <td>{{ co.name }}</td>
                 <!-- <td>{{ co.type }}</td> -->
                 <td>{{ co.price }}</td>
                 <td>{{ co.number }}</td>
+                <td>{{ co.distribution_place }}</td>
+                {% if co.received is True %}
+                <td>✅</td>
+                {% else %}
+                <td>❌</td>
+                {% endif %}
                 <!-- <td>{{ co.cuisine }}</td> -->
             </tr>
             {% endfor %}
@@ -91,5 +102,13 @@
 {% endblock %}
 {% block scripts %}
 <script>
+    $(".btn_del_order").click(function(){
+        date = $(this).parent().siblings(".dateTd").text()
+        if (confirm('你確定要取消 '+ date +' 的訂單嗎？')){
+            return true
+        }else{
+            return false
+        }
+    })
 </script>
 {% endblock %}

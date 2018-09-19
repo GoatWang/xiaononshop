@@ -1,0 +1,248 @@
+{% extends "order/layout.html" %}
+{% load staticfiles %}
+
+
+{% block scripts_top %}
+{% endblock %}
+
+
+{% block styles %}
+<style>
+    #searchInput {
+        max-width: 300px;
+    }
+
+    h5 {
+        margin-left: 30px;
+    }
+
+    table {
+        margin-left: 50px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 class="title" data-days-from-today="{{days_from_today}}">{{ title }} （{{ Date }}）</h2>
+
+<h3>調貨系統</h3>
+
+<form style="margin:50px 0px">
+    <div class="form-group row">
+        <label class="dropdown" id="btdpdropdown" data-toggle="dropdown"></label>
+        <div class="col-1"> 從 </div>
+        <div class="col-8">
+            <select class="form-control transferFrom">
+                <option value="" selected disabled> 請選擇從何處調貨 </option>
+                {% for dp in dp_list %}
+                <option value="{{ dp.id }}">{{ dp.name }}</option>
+                {% endfor %}
+
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="dropdown" id="btdpdropdown" data-toggle="dropdown">
+        </label>
+        <div class="col-1"> 調 </div>
+        <div class="col-5">
+            <select class="form-control btInput">
+                <option value="" selected disabled> 請選擇便當 </option>
+
+
+            </select>
+        </div>
+        <div class="col-4">
+            <select class="form-control quantityInput">
+                <option value="" selected disabled> 數量 </option>
+
+            </select>
+        </div>
+        <div class="col-1"> 個 </div>
+
+    </div>
+
+    <div class="form-group row">
+        <label class="dropdown" id="btdpdropdown" data-toggle="dropdown">
+        </label>
+        <div class="col-1"> 到 </div>
+        <div class="col-8">
+            <select class="form-control transferTo">
+                <option value="" selected disabled> 請選擇調貨至何處 </option>
+                {% for dp in dp_list %}
+                <option value="{{ dp.id }}">{{ dp.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="input-group mb-3">
+        <button id="submitBtn" type="button" class="btn btn-success">送出</button>
+    </div>
+</form>
+
+
+<h3>便當分布狀況</h3>
+
+{% for area_info in Area_limitation_infos %}
+<h4>{{area_info.area}}</h4>
+<br>
+{% for dp_name, dpls in area_info.dps.items %}
+<div class="row">
+    <h5>{{ dp_name }}</h5>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th colspan="1">便當名稱</th>
+                <th colspan="1">便當類別</th>
+                <th colspan="1">目前預定</th>
+                <th colspan="1">剩餘</th>
+                <th colspan="1">總數</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dpl in dpls %}
+            <tr>
+                <td>{{ dpl.bento_name }}</td>
+                <td>{{ dpl.bento_type }}</td>
+                <td>{{ dpl.total_order_number }}</td>
+                <td>{{ dpl.remain_number }}</td>
+                <td>{{ dpl.dp_limitation }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+{% endfor %}
+
+{% endblock %}
+{% block scripts %}
+<script>
+</script>
+<script>
+    $.ajaxSetup({
+        headers: {
+            "X-CSRFToken": '{{ csrf_token }}'
+        }
+    });
+    days_from_today = $(".title").data("days-from-today")
+    $(".transferFrom").change(function () {
+        dp_id = parseInt($(this).val())
+        $.ajax({
+            type: 'POST',
+            url: '{% url "order:backend_transfer_change" %}',
+            data: {
+                "filed": "transferFrom",
+                "days_from_today": JSON.stringify(days_from_today),
+                "from": JSON.stringify(dp_id)
+            },
+            async: false,
+            dataType: 'json',
+            success: function (response) {
+                
+                bento_list = response.bento_list
+                $(".btInput option").remove()
+                $(".btInput").append('<option value = "" selected disabled>請選擇便當</option>')
+
+                for (var i = 0; i < bento_list.length; i++) {
+                    $(".btInput").append($('<option>', {
+                        value: bento_list[i].id,
+                        text: bento_list[i].name
+                    }))
+                }
+            },
+            error: function (jqXHR, exception) {
+                var msg = '';
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+                alert("請求失敗 " + msg)
+            },
+        })
+    })
+
+    $(".btInput").change(function () {
+        bento_selected = $(this).val()
+        for (var i = 0; i < bento_list.length; i++) {
+            if (bento_selected == bento_list[i].id) {
+                $(".quantityInput option").remove()
+                $(".quantityInput").append('<option value = "" selected disabled>數量</option>')
+                for (var j = 0; j < bento_list[i].remain; j++) {
+                    $(".quantityInput").append($('<option>', {
+                        value: j+1,
+                        text: j+1
+                    }))
+                }
+            }
+        }
+    })
+
+    $("#submitBtn").click(function(){
+        //TODO: check if every column have input
+        transfer_from_id = parseInt($(".transferFrom").val())
+        transfer_to_id = parseInt($(".transferTo").val())
+        bento = parseInt($(".btInput").val())
+        number = parseInt($(".quantityInput").val())
+        console.log(transfer_from_id,transfer_to_id,bento, number)
+        $.ajax({
+            type: 'POST',
+            url: '{% url "order:backend_transfer_change" %}',
+            data: {
+                "filed": "submit",
+                "days_from_today": JSON.stringify(days_from_today),
+                "from": JSON.stringify(transfer_from_id),
+                "to": JSON.stringify(transfer_to_id),
+                "bento": JSON.stringify(bento),
+                "number": JSON.stringify(number)
+            },
+            async: false,
+            dataType: 'json',
+            success: function (response) {
+                // console.log(response.success)
+                if(response.success == true){
+                    alert(response.message)
+                    location.reload()
+                }
+                else{
+                    alert(response.message)
+                }
+            },
+            error: function (jqXHR, exception) {
+                var msg = '';
+                if (jqXHR.status === 0) {
+                    msg = 'Not connect.\n Verify Network.';
+                } else if (jqXHR.status == 404) {
+                    msg = 'Requested page not found. [404]';
+                } else if (jqXHR.status == 500) {
+                    msg = 'Internal Server Error [500].';
+                } else if (exception === 'parsererror') {
+                    msg = 'Requested JSON parse failed.';
+                } else if (exception === 'timeout') {
+                    msg = 'Time out error.';
+                } else if (exception === 'abort') {
+                    msg = 'Ajax request aborted.';
+                } else {
+                    msg = 'Uncaught Error.\n' + jqXHR.responseText;
+                }
+                alert("請求失敗 " + msg)
+            },
+        })
+
+
+    })
+</script>
+{% endblock %}

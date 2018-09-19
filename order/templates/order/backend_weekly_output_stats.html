@@ -1,0 +1,101 @@
+{% extends "order/layout.html" %}
+{% load staticfiles %}
+
+
+{% block scripts_top %}
+{% endblock %}
+
+
+{% block styles %}
+<style>
+    h5{
+        margin-left: 30px;
+    }
+    table{
+        margin-left: 50px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+
+{% for dp_name, dp_weekdays in total_orders.items %}
+<div class="row">
+    <h4>{{ dp_name }}</h4>
+
+    <table class = "table">
+        <thead>
+            <tr>
+                <th colspan="1">星期一</th>
+                <th colspan="1">星期二</th>
+                <th colspan="1">星期三</th>
+                <th colspan="1">星期四</th>
+                <th colspan="1">星期五</th>
+                <th colspan="1">星期六</th>
+                <th colspan="1">星期日</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for weekday, bentos in dp_weekdays.items %}
+                    <td>
+                        {% for bento_id, bento_contents in bentos.items %}
+                            <div>
+                                <b>{{ bento_contents.bento_name }}</b><br>
+                                總數：{{ bento_contents.limitation }} <br>
+                                剩餘：{{ bento_contents.remain }}
+                            </div>
+                            <br>
+                        {% endfor %} 
+                    </td>
+                {% endfor %}
+            </tr>
+            
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+
+<!-- {% for area_orders in order_list_groupped_table%}
+<h4>{{ area_orders.area }}</h4>
+<div class="row">
+    {% for dpo in area_orders.distribution_place_order %}
+    <h5>{{ dpo.distribution_place }}</h5>
+    <table  class="table">
+        <thead>
+            <tr>
+                <th>類型</th>
+                <th>便當</th>
+                <th>已訂</th>
+                <th>現場</th>
+                <th>總共</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for ol in dpo.order_list %}
+        <tr>
+            <td>{{ ol.bento_name }}</td>
+            <td>{{ ol.bento_type }}</td>
+            <td>{{ ol.number }}</td>
+            <td>{{ ol.remain }}</td>
+            <td>{{ ol.limitation }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+</div>
+{% endfor %} -->
+
+
+
+
+
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+</script>
+{% endblock %}

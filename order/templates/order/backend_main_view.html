@@ -20,6 +20,13 @@
     </li>
 </ul>
 
+<h4>調貨(管理員)</h4>
+<ul>
+    <li>
+        <a href="{% url 'order:backend_bento_transfer' add_days=1 %}">調貨（明）</a>
+    </li>
+</ul>
+
 <h4>出貨(管理員)</h4>
 <ul>
     <li>
@@ -30,6 +37,12 @@
     </li>
     <li>
         <a href="{% url 'order:backend_daily_ouput_stats' add_days=2 %}">出貨統計(後)</a>
+    </li>
+    <li>
+        <a href="{% url 'order:backend_weekly_ouput_stats' week=0 %}">出貨統計(本週)</a>
+    </li>
+    <li>
+        <a href="{% url 'order:backend_weekly_ouput_stats' week=1 %}">出貨統計(下週)</a>
     </li>
 </ul>
 

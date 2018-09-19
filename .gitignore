@@ -1,13 +1,19 @@
+# Pwd and Env
+*.env
 pwd.json
-*.log
+
+# Venv
 venv
-*.pyc
+
+# my_settings/*
+
 staticfiles
-.env
-.vscode
-__pycache__
-pwd.json
 data/*
+*.vscode
+*.ipynb
+*.log
+*.pyc
+__pycache__
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
